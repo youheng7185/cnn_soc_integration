@@ -1,3 +1,6 @@
 [submodule "cv32e40p"]
 	path = cv32e40p
 	url = https://github.com/openhwgroup/cv32e40p.git
+[submodule "axi_gpio"]
+	path = axi_gpio
+	url = https://github.com/youheng7185/axi_gpio.git

@@ -26,6 +26,7 @@ int main(int argc, char **argv) {
     
     // Access internal signal through rootp
     std::cout << "mem_req = " << (int)dut->rootp->cv32e40p_verilator_top__DOT__mem_req << std::endl;
+    std::cout << "gpio_in from axi = " << dut->rootp->cv32e40p_verilator_top__DOT__u_core__DOT__core_i__DOT__load_store_unit_i__DOT__data_rdata_ext << std::endl;
     std::cout << "gpio_out = " << dut->gpio_out << std::endl; // test pattern 0x5A5A
 
     dut->final();

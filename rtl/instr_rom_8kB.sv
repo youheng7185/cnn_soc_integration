@@ -23,9 +23,10 @@ module instr_rom_8kB (
         instr_mem[3] = 32'h0063a023;  // sw  t1, 0(t2)
         instr_mem[4] = 32'h00005e37;  // lui t3, 0x5
         instr_mem[5] = 32'ha5ae0e13;  // addi t3, t3, -1446
-        instr_mem[6] = 32'h01c29223;  // sh  t3, 4(t0)
+        instr_mem[6] = 32'h01c2a223;  // sh  t3, 4(t0)
+        instr_mem[7] = 32'h0000006f;  // loop
 
-        for (int i = 7; i < 2048; i++) begin
+        for (int i = 8; i < 2048; i++) begin
             instr_mem[i] = 32'h00000013;  // NOP (addi x0, x0, 0)
         end
     end

@@ -7,7 +7,7 @@ module data_bus_decoder (
     input logic [3:0] data_be_i,
     input logic [31:0] data_addr_i,
     input logic [31:0] data_wdata_i,
-    output logic [31:0] data_rdata_o
+    output logic [31:0] data_rdata_o,
 
     // data memory interface
     output logic mem_req_o,
@@ -27,7 +27,7 @@ module data_bus_decoder (
     output logic [3:0] axi_be_o,
     output logic [31:0] axi_addr_o,
     output logic [31:0] axi_wdata_o,
-    input logic [31:0] axi_rdata_i,
+    input logic [31:0] axi_rdata_i
 );
 
     // 0x0000 0000 to 0x7fff ffff is allocated to data memory

@@ -1,0 +1,9 @@
+# Ignore Verilator output folder
+obj_dir/
+
+# Optional: ignore temporary simulation logs or dump files
+*.vcd
+*.fst
+*.log
+*.o
+*.d

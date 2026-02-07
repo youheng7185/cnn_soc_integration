@@ -17,6 +17,14 @@ module boot_rom_1kB (
     assign instr_gnt_o   = 1'b1;
     assign instr_rdata_o = rdata_q;
 
+    initial begin
+        instr_mem[0] = 32'h800002b7; // lui t0, 0x80000000
+        instr_mem[1] = 32'h000280e7; // JALR x0, 0(t0), jump to address in t0
+        for (int i = 2; i < 256; i++) begin
+            instr_mem[i] = 32'h00000013;  // NOP (addi x0, x0, 0)
+        end
+    end
+    
     always_ff @(posedge clk_core or negedge rst_core_n) begin
         if (!rst_core_n) begin
             instr_rvalid_o <= 1'b0;

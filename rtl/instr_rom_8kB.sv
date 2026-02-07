@@ -16,6 +16,12 @@ module instr_rom_8kB (
     assign instr_gnt_o = 1'b1; // Always ready
     assign instr_rdata_o = rdata_q;
 
+    initial begin
+        for (int i = 0; i < 2048; i++) begin
+            instr_mem[i] = 32'h00000013;  // NOP (addi x0, x0, 0)
+        end
+    end
+
     always_ff @(posedge clk_core or negedge rst_core_n) begin
         if (!rst_core_n) begin
             instr_rvalid_o <= 1'b0;

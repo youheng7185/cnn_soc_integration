@@ -21,11 +21,13 @@ int main(int argc, char **argv) {
     tick(5, dut, tfp);
     
     dut->rst_ni = 1;
+    dut->gpio_in = 0xABAB;
     tick(200, dut, tfp);
     
     // Access internal signal through rootp
     std::cout << "mem_req = " << (int)dut->rootp->cv32e40p_verilator_top__DOT__mem_req << std::endl;
-    
+    std::cout << "gpio_out = " << dut->gpio_out << std::endl; // test pattern 0x5A5A
+
     dut->final();
     tfp->close();
     delete tfp;

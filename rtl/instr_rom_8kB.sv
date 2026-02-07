@@ -17,7 +17,15 @@ module instr_rom_8kB (
     assign instr_rdata_o = rdata_q;
 
     initial begin
-        for (int i = 0; i < 2048; i++) begin
+        instr_mem[0] = 32'h800002b7;  // lui t0, 0x80000
+        instr_mem[1] = 32'h0002a303;  // lw  t1, 0(t0)
+        instr_mem[2] = 32'h00000397;  // lui t2, 0x00000
+        instr_mem[3] = 32'h0063a023;  // sw  t1, 0(t2)
+        instr_mem[4] = 32'h00005e37;  // lui t3, 0x5
+        instr_mem[5] = 32'ha5ae0e13;  // addi t3, t3, -1446
+        instr_mem[6] = 32'h01c29223;  // sh  t3, 4(t0)
+
+        for (int i = 7; i < 2048; i++) begin
             instr_mem[i] = 32'h00000013;  // NOP (addi x0, x0, 0)
         end
     end

@@ -39,13 +39,13 @@ module data_bus_decoder (
     assign mem_we_o = data_we_i & target_native;
     assign mem_addr_o = data_addr_i;
     assign mem_wdata_o = data_wdata_i;
-    assign mem_be = data_be_i;
+    assign mem_be_o = data_be_i;
 
     assign axi_req_o = data_req_i & target_axi;
     assign axi_we_o = data_we_i & target_axi;
     assign axi_addr_o = data_addr_i;
     assign axi_wdata_o = data_wdata_i;
-    assign axi_be = data_be_i;    
+    assign axi_be_o = data_be_i;    
 
     assign data_gnt_o = target_native ? mem_gnt_i : axi_gnt_i;
     assign data_rvalid_o = target_native ? mem_rvalid_i : axi_rvalid_i;

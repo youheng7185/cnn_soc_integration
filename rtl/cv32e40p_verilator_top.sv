@@ -1,6 +1,8 @@
 module cv32e40p_verilator_top (
     input logic clk_i,
-    input logic rst_ni
+    input logic rst_ni,
+    input logic [15:0] gpio_in,
+    output logic [15:0] gpio_out
 );
     // =====================
     // CPU data bus wires
@@ -25,6 +27,15 @@ module cv32e40p_verilator_top (
     logic [31:0] mem_addr;
     logic [31:0] mem_wdata;
     logic [31:0] mem_rdata;
+
+    logic        axi_req;
+    logic        axi_gnt;
+    logic        axi_rvalid;
+    logic        axi_we;
+    logic [3:0]  axi_be;
+    logic [31:0] axi_addr;
+    logic [31:0] axi_wdata;
+    logic [31:0] axi_rdata;
 
     // =====================
     // AXI wires (core2axi side)

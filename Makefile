@@ -1,65 +1,63 @@
 # ============================================================
 # Verilator Makefile – CV32E40P SoC
 # ============================================================
-
 TOP            := cv32e40p_verilator_top
 BUILD_DIR      := obj_dir
 SIM            := $(BUILD_DIR)/V$(TOP)
-
 VERILATOR      := verilator
 CXXFLAGS       := -O2 -std=c++17
 VERILATOR_FLAGS := \
-	--cc \
-	--exe \
-	--trace-fst \
-	--Wall \
-	-Wno-fatal \
-	--top-module $(TOP) \
-	-Mdir $(BUILD_DIR) \
-	-CFLAGS "$(CXXFLAGS)"
+    --cc \
+    --exe \
+    --trace-fst \
+    --trace-structs \
+    --trace-depth 99 \
+    --Wall \
+    -Wno-fatal \
+    --top-module $(TOP) \
+    -Mdir $(BUILD_DIR) \
+    -CFLAGS "$(CXXFLAGS)"
 
 # ------------------------------------------------------------
-# Testbench (you will add tb.cpp later)
+# Testbench
 # ------------------------------------------------------------
 TB_CPP := tb/tb.cpp
 
 # ------------------------------------------------------------
 # RTL sources
 # ------------------------------------------------------------
-
 VERILATOR_DEFS := 
 
 CV32_PKG := \
-	cv32e40p/rtl/include/cv32e40p_pkg.sv \
-	cv32e40p/rtl/include/cv32e40p_apu_core_pkg.sv \
-	cv32e40p/rtl/include/cv32e40p_fpu_pkg.sv
+    cv32e40p/rtl/include/cv32e40p_pkg.sv \
+    cv32e40p/rtl/include/cv32e40p_apu_core_pkg.sv \
+    cv32e40p/rtl/include/cv32e40p_fpu_pkg.sv
 
 CV32_CORE := $(shell find cv32e40p/rtl -name "*.sv" \
-	! -path "*vendor*" \
-	! -name "*fp*" \
-	! -name "*fpu*" )
+    ! -path "*vendor*" \
+    ! -name "*fp*" \
+    ! -name "*fpu*" )
 
 RTL_SRC := \
-	$(CV32_PKG) \
-	$(CV32_CORE) \
-	cv32e40p/bhv/cv32e40p_sim_clock_gate.sv \
-	core2axi/rtl/core2axi.sv \
-	axi_gpio/axi_gpio.sv \
-	rtl/instr_bus_decoder.sv \
-	rtl/instr_rom_8kB.sv \
-	rtl/boot_rom_1kB.sv \
-	rtl/data_bus_decoder.sv \
-	rtl/data_mem_8kB.sv \
-	rtl/cv32e40p_verilator_top.sv
+    $(CV32_PKG) \
+    $(CV32_CORE) \
+    cv32e40p/bhv/cv32e40p_sim_clock_gate.sv \
+    core2axi/rtl/core2axi.sv \
+    axi_gpio/axi_gpio.sv \
+    rtl/instr_bus_decoder.sv \
+    rtl/instr_rom_8kB.sv \
+    rtl/boot_rom_1kB.sv \
+    rtl/data_bus_decoder.sv \
+    rtl/data_mem_8kB.sv \
+    rtl/cv32e40p_verilator_top.sv
 
 # Include paths (SystemVerilog packages)
 INCLUDES := \
-	-Icv32e40p/rtl/include
+    -Icv32e40p/rtl/include
 
 # ------------------------------------------------------------
 # Build rules
 # ------------------------------------------------------------
-
 all: $(SIM)
 
 $(SIM): $(RTL_SRC) $(TB_CPP)
@@ -72,7 +70,10 @@ $(SIM): $(RTL_SRC) $(TB_CPP)
 run: $(SIM)
 	./$(SIM)
 
-clean:
-	rm -rf $(BUILD_DIR)
+wave: run
+	gtkwave waveform.fst &
 
-.PHONY: all run clean
+clean:
+	rm -rf $(BUILD_DIR) waveform.fst waveform.vcd
+
+.PHONY: all run wave clean

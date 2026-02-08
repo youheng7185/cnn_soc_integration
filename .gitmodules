@@ -7,3 +7,6 @@
 [submodule "core2axi"]
 	path = core2axi
 	url = https://github.com/youheng7185/core2axi.git
+[submodule "cnn_soc_c_project"]
+	path = cnn_soc_c_project
+	url = https://github.com/youheng7185/cnn_soc_c_project.git

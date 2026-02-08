@@ -32,7 +32,7 @@ module instr_rom_8kB (
     // end
 
     initial begin
-        $readmemh("firmware_clean.hex", instr_mem);
+        $readmemh("cnn_soc_c_project/build/firmware_clean.hex", instr_mem);
     end
 
     always_ff @(posedge clk_core or negedge rst_core_n) begin

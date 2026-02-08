@@ -22,7 +22,7 @@ int main(int argc, char **argv) {
     
     dut->rst_ni = 1;
     dut->gpio_in = 0xABAB;
-    tick(200, dut, tfp);
+    tick(5000, dut, tfp);
     
     // Access internal signal through rootp
     std::cout << "mem_req = " << (int)dut->rootp->cv32e40p_verilator_top__DOT__mem_req << std::endl;

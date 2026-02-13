@@ -50,6 +50,7 @@ RTL_SRC := \
     axi_uart/uart.sv \
     axi_uart/uart_rx.sv \
     axi_uart/uart_tx.sv \
+    axi_data_mem/axi_data_mem.sv \
     rtl/axi_interconnect.sv \
     rtl/instr_bus_decoder.sv \
     rtl/instr_rom_8kB.sv \

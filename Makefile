@@ -55,8 +55,6 @@ RTL_SRC := \
     rtl/instr_bus_decoder.sv \
     rtl/instr_rom_8kB.sv \
     rtl/boot_rom_1kB.sv \
-    rtl/data_bus_decoder.sv \
-    rtl/data_mem_8kB.sv \
     rtl/cv32e40p_verilator_top.sv
 
 # Include paths (SystemVerilog packages)

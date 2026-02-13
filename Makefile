@@ -44,8 +44,13 @@ RTL_SRC := \
     cv32e40p/bhv/cv32e40p_sim_clock_gate.sv \
     core2axi/rtl/core2axi.sv \
     axi_gpio/axi_gpio.sv \
+    axi_timer/timer.sv \
     axi_timer/axi_timer.sv \
     axi_uart/axi_uart.sv \
+    axi_uart/uart.sv \
+    axi_uart/uart_rx.sv \
+    axi_uart/uart_tx.sv \
+    rtl/axi_interconnect.sv \
     rtl/instr_bus_decoder.sv \
     rtl/instr_rom_8kB.sv \
     rtl/boot_rom_1kB.sv \

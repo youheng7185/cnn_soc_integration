@@ -274,7 +274,7 @@ module cv32e40p_verilator_top (
         // -------------------------
         .S_AXI_AWVALID (axi_aw_valid),
         .S_AXI_AWREADY (axi_aw_ready),
-        .S_AXI_AWADDR  (axi_aw_addr[5:2]), // 4-bit word address
+        .S_AXI_AWADDR  (axi_aw_addr[3:0]), // 4-bit word address
 
         // -------------------------
         // Write data channel

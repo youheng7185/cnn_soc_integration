@@ -10,3 +10,9 @@
 [submodule "cnn_soc_c_project"]
 	path = cnn_soc_c_project
 	url = https://github.com/youheng7185/cnn_soc_c_project.git
+[submodule "axi_timer"]
+	path = axi_timer
+	url = https://github.com/youheng7185/axi_timer.git
+[submodule "axi_uart"]
+	path = axi_uart
+	url = https://github.com/youheng7185/axi_uart.git

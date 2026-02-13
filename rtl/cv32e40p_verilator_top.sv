@@ -101,7 +101,7 @@ module cv32e40p_verilator_top (
         .scan_cg_en_i     (1'b0),
 
         .boot_addr_i      (32'h0000_0000),
-        .mtvec_addr_i     (32'h0000_0100),
+        .mtvec_addr_i     (32'h8000_0100),
         .dm_halt_addr_i   (32'h0000_0800),
         .hart_id_i        (32'h0),
         .dm_exception_addr_i (32'h0000_0808),

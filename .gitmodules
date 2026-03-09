@@ -16,3 +16,6 @@
 [submodule "axi_uart"]
 	path = axi_uart
 	url = https://github.com/youheng7185/axi_uart.git
+[submodule "axi_data_mem"]
+	path = axi_data_mem
+	url = https://github.com/youheng7185/axi_data_mem.git

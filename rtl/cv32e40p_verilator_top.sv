@@ -328,24 +328,27 @@ module cv32e40p_verilator_top (
     // =====================
     // AXI Peripheral wires - CNN Accelerator
     // =====================
-    logic [31:0] cnn_axi_awaddr;
-    logic        cnn_axi_awvalid;
-    logic        cnn_axi_awready;
-    logic [31:0] cnn_axi_wdata;
-    logic [3:0]  cnn_axi_wstrb;
-    logic        cnn_axi_wvalid;
-    logic        cnn_axi_wready;
-    logic [1:0]  cnn_axi_bresp;
-    logic        cnn_axi_bvalid;
-    logic        cnn_axi_bready;
-    logic [31:0] cnn_axi_araddr;
-    logic        cnn_axi_arvalid;
-    logic        cnn_axi_arready;
-    logic [31:0] cnn_axi_rdata;
-    logic [1:0]  cnn_axi_rresp;
-    logic        cnn_axi_rvalid;
-    logic        cnn_axi_rready;
+    wire [31:0] cnn_axi_awaddr;
+    wire        cnn_axi_awvalid;
+    wire        cnn_axi_awready;
 
+    wire [31:0] cnn_axi_wdata;
+    wire [3:0]  cnn_axi_wstrb;
+    wire        cnn_axi_wvalid;
+    wire        cnn_axi_wready;
+
+    wire [1:0]  cnn_axi_bresp;
+    wire        cnn_axi_bvalid;
+    wire        cnn_axi_bready;
+
+    wire [31:0] cnn_axi_araddr;
+    wire        cnn_axi_arvalid;
+    wire        cnn_axi_arready;
+
+    wire [31:0] cnn_axi_rdata;
+    wire [1:0]  cnn_axi_rresp;
+    wire        cnn_axi_rvalid;
+    wire        cnn_axi_rready;
 
      // =====================
     // AXI Interconnect (1-to-6)
@@ -665,5 +668,34 @@ module cv32e40p_verilator_top (
         .uart_tx_o     (uart_tx_o)
     );
     
+
+    axi_cnn u_axi_cnn (
+        .S_AXI_ACLK      (clk_i),
+        .S_AXI_ARESETN   (rst_ni),
+
+        .S_AXI_AWVALID   (cnn_axi_awvalid),
+        .S_AXI_AWREADY   (cnn_axi_awready),
+        .S_AXI_AWADDR    (cnn_axi_awaddr[11:0]),
+        .S_AXI_AWPROT    (3'b000),
+
+        .S_AXI_WVALID    (cnn_axi_wvalid),
+        .S_AXI_WREADY    (cnn_axi_wready),
+        .S_AXI_WDATA     (cnn_axi_wdata),
+        .S_AXI_WSTRB     (cnn_axi_wstrb),
+
+        .S_AXI_BVALID    (cnn_axi_bvalid),
+        .S_AXI_BREADY    (cnn_axi_bready),
+        .S_AXI_BRESP     (cnn_axi_bresp),
+
+        .S_AXI_ARVALID   (cnn_axi_arvalid),
+        .S_AXI_ARREADY   (cnn_axi_arready),
+        .S_AXI_ARADDR    (cnn_axi_araddr[11:0]),
+        .S_AXI_ARPROT    (3'b000),
+
+        .S_AXI_RVALID    (cnn_axi_rvalid),
+        .S_AXI_RREADY    (cnn_axi_rready),
+        .S_AXI_RDATA     (cnn_axi_rdata),
+        .S_AXI_RRESP     (cnn_axi_rresp)
+    );
 
 endmodule

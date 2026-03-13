@@ -43,6 +43,14 @@ RTL_SRC := \
     $(CV32_CORE) \
     cv32e40p/bhv/cv32e40p_sim_clock_gate.sv \
     core2axi/rtl/core2axi.sv \
+    axi_cnn/axi_cnn.sv \
+    axi_cnn/cnn_controller.sv \
+    axi_cnn/conv.sv \
+    axi_cnn/fc.sv \
+    axi_cnn/final_weights_seperate_class.sv \
+    axi_cnn/first_weights_seperate_filter.sv \
+    axi_cnn/mac.sv \
+    axi_cnn/prepare_data.sv \
     axi_gpio/axi_gpio.sv \
     axi_timer/timer.sv \
     axi_timer/axi_timer.sv \

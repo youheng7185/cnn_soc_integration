@@ -19,3 +19,6 @@
 [submodule "axi_cnn"]
 	path = axi_cnn
 	url = https://github.com/youheng7185/CNN_CORE_HDL.git
+[submodule "axi_data_mem"]
+	path = axi_data_mem
+	url = https://github.com/youheng7185/axi_data_mem.git

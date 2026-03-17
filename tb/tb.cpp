@@ -2,10 +2,12 @@
 #include "verilated.h"
 #include "Vcv32e40p_verilator_top___024root.h"
 #include "verilated_fst_c.h"
+#include "conv_input_data.h"
 #include <iostream>
 #include <cstdint>
 
 void tick(int32_t tick_val, Vcv32e40p_verilator_top *dut, VerilatedFstC* tfp);
+void uart_send_byte(Vcv32e40p_verilator_top *dut, VerilatedFstC* tfp, uint8_t data);
 
 int main(int argc, char **argv) {
     Verilated::commandArgs(argc, argv);
@@ -21,8 +23,25 @@ int main(int argc, char **argv) {
     tick(5, dut, tfp);
     
     dut->rst_ni = 1;
+    dut->uart_rx_i = 1; // not active
     dut->gpio_in = 0xABAB;
-    tick(500000, dut, tfp);
+
+    tick(100000, dut, tfp);
+
+    for (uint32_t i = 0; i < 1960; i++) {
+        uart_send_byte(dut, tfp, conv2d_input_no[i]);
+
+        // if (i == 10) {
+        //     dut->final();
+        //     tfp->close();
+        //     delete tfp;
+        //     delete dut;
+            
+        //     return 0;
+        // }
+    }  
+
+    tick(500000, dut, tfp); // let it process
     
     // Access internal signal through rootp
     //std::cout << "mem_req = " << (int)dut->rootp->cv32e40p_verilator_top__DOT__mem_req << std::endl;
@@ -49,4 +68,27 @@ void tick(int32_t tick_val, Vcv32e40p_verilator_top *dut, VerilatedFstC* tfp) {
         dut->eval();
         tfp->dump(sim_time++);
     }
+}
+
+void uart_send_byte(Vcv32e40p_verilator_top *dut, VerilatedFstC* tfp, uint8_t data) {
+    const int BIT_CYCLES = 217;
+
+    auto drive = [&](int val) {
+        dut->uart_rx_i = val;
+        tick(BIT_CYCLES, dut, tfp);
+    };
+
+    // Idle (ensure line is high before start)
+    drive(1);
+
+    // Start bit
+    drive(0);
+
+    // Data bits (LSB first)
+    for (int i = 0; i < 8; i++) {
+        drive((data >> i) & 1);
+    }
+
+    // Stop bit (assuming 1 stop bit)
+    drive(1);
 }

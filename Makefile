@@ -9,6 +9,7 @@ CXXFLAGS       := -O2 -std=c++17
 VERILATOR_FLAGS := \
     --cc \
     --exe \
+    --no-timing \
     --trace-fst \
     --trace-structs \
     --trace-depth 99 \
@@ -39,6 +40,13 @@ CV32_CORE := $(shell find cv32e40p/rtl -name "*.sv" \
     ! -name "*fpu*" )
 
 RTL_SRC := \
+    tech_cells_generic/src/rtl/tc_clk.sv \
+    common_cells/src/cdc_2phase_clearable.sv \
+    common_cells/src/cdc_reset_ctrlr_pkg.sv \
+    common_cells/src/cdc_reset_ctrlr.sv \
+    common_cells/src/fifo_v3.sv \
+    common_cells/src/sync.sv \
+    common_cells/src/cdc_4phase.sv \
     riscv-dbg/src/dm_pkg.sv \
     $(CV32_PKG) \
     $(CV32_CORE) \
@@ -78,7 +86,8 @@ RTL_SRC := \
 
 # Include paths (SystemVerilog packages)
 INCLUDES := \
-    -Icv32e40p/rtl/include
+    -Icv32e40p/rtl/include \
+    -Icommon_cells/include
 
 # ------------------------------------------------------------
 # Build rules

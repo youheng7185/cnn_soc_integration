@@ -63,7 +63,10 @@ RTL_SRC := \
     rtl/instr_bus_decoder.sv \
     rtl/instr_rom_8kB.sv \
     rtl/boot_rom_1kB.sv \
-    rtl/cv32e40p_verilator_top.sv
+    rtl/cv32e40p_verilator_top.sv \
+    riscv-dbg/src/dmi_jtag.sv \
+    riscv-dbg/src/dm_top.sv \
+    riscv-dbg/tb/SimJTAG.sv
 
 # Include paths (SystemVerilog packages)
 INCLUDES := \

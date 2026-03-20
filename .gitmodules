@@ -22,3 +22,6 @@
 [submodule "axi_data_mem"]
 	path = axi_data_mem
 	url = https://github.com/youheng7185/axi_data_mem.git
+[submodule "riscv-dbg"]
+	path = riscv-dbg
+	url = https://github.com/pulp-platform/riscv-dbg.git

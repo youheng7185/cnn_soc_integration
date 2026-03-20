@@ -66,6 +66,50 @@ module cv32e40p_verilator_top (
     logic [31:0] imem_addr;
     logic [31:0] imem_rdata;
 
+    // debug wires
+    localparam int unsigned NrHarts         = 1;
+    localparam logic [NrHarts-1:0] SEL_HARTS = 1'b1;
+    localparam HARTINFO = {8'h0, 4'h2, 3'b0, 1'b1, dm::DataCount, dm::DataAddr};
+    localparam int unsigned OPENOCD_PORT    = 9999;
+
+    logic sim_jtag_tck;
+    logic sim_jtag_tms;
+    logic sim_jtag_tdi;
+    logic sim_jtag_trstn;
+    logic sim_jtag_tdo;
+    logic [31:0] sim_jtag_exit;
+
+    dm::dmi_req_t  jtag_dmi_req;
+    dm::dmi_resp_t debug_resp;
+    logic          jtag_req_valid;
+    logic          debug_req_ready;
+    logic          jtag_resp_ready;
+    logic          jtag_resp_valid;
+
+    logic        dm_req;
+    logic        dm_we;
+    logic [31:0] dm_addr;
+    logic [3:0]  dm_be;
+    logic [31:0] dm_wdata;
+    logic [31:0] dm_rdata;
+    logic        dm_gnt;
+    logic        dm_rvalid;
+
+    logic        sb_req;
+    logic [31:0] sb_addr;
+    logic        sb_we;
+    logic [31:0] sb_wdata;
+    logic [3:0]  sb_be;
+    logic        sb_gnt;
+    logic        sb_rvalid;
+    logic [31:0] sb_rdata;
+
+    logic [NrHarts-1:0] dm_debug_req;
+
+    logic ndmreset;
+    logic ndmreset_n;
+    assign ndmreset_n = rst_ni & ~ndmreset;
+
     cv32e40p_top #(
         .COREV_PULP(0),
         .COREV_CLUSTER(0),
@@ -74,7 +118,7 @@ module cv32e40p_verilator_top (
         .NUM_MHPMCOUNTERS(1)        
     ) u_core (
         .clk_i            (clk_i),
-        .rst_ni            (rst_ni),
+        .rst_ni           (ndmreset_n),
 
         .pulp_clock_en_i  (1'b1),
         .scan_cg_en_i     (1'b0),
@@ -106,7 +150,8 @@ module cv32e40p_verilator_top (
         .irq_i            (32'h0),
         .irq_ack_o        (),
         .irq_id_o         (),
-        .debug_req_i      (1'b0),
+
+        .debug_req_i      (dm_debug_req[0]),
         .debug_havereset_o(),
         .debug_running_o  (),
         .debug_halted_o   (),
@@ -199,6 +244,98 @@ module cv32e40p_verilator_top (
         .instr_addr_i   (imem_addr),
         .instr_rdata_o  (imem_rdata)
     );
+
+    // debug
+
+    dmi_jtag #(
+        .IdcodeValue (32'h249511C3)
+    ) i_dmi_jtag (
+        .clk_i           (clk_i),
+        .rst_ni          (rst_ni),
+        .testmode_i      (1'b0),
+        .dmi_req_o       (jtag_dmi_req),
+        .dmi_req_valid_o (jtag_req_valid),
+        .dmi_req_ready_i (debug_req_ready),
+        .dmi_resp_i      (debug_resp),
+        .dmi_resp_ready_o(jtag_resp_ready),
+        .dmi_resp_valid_i(jtag_resp_valid),
+        .dmi_rst_no      (),
+        .tck_i           (sim_jtag_tck),
+        .tms_i           (sim_jtag_tms),
+        .trst_ni         (sim_jtag_trstn),
+        .td_i            (sim_jtag_tdi),
+        .td_o            (sim_jtag_tdo),
+        .tdo_oe_o        ()
+    );
+
+    dm_top #(
+        .NrHarts        (NrHarts),
+        .BusWidth       (32),
+        .SelectableHarts(SEL_HARTS)
+    ) i_dm_top (
+        .clk_i            (clk_i),
+        .rst_ni           (rst_ni),          // dm_top resets from external only
+        .testmode_i       (1'b0),
+        .ndmreset_o       (ndmreset),        // → combined with rst_ni above
+        .dmactive_o       (),
+        .debug_req_o      (dm_debug_req),    // → core debug_req_i
+        .unavailable_i    (~SEL_HARTS),
+        .hartinfo_i       (HARTINFO),
+
+        // slave port — DM register access from bus
+        .slave_req_i      (dm_req),
+        .slave_we_i       (dm_we),
+        .slave_addr_i     (dm_addr),
+        .slave_be_i       (dm_be),
+        .slave_wdata_i    (dm_wdata),
+        .slave_rdata_o    (dm_rdata),
+
+        // master port — system bus access (DM reads/writes memory directly)
+        .master_req_o     (sb_req),
+        .master_add_o     (sb_addr),
+        .master_we_o      (sb_we),
+        .master_wdata_o   (sb_wdata),
+        .master_be_o      (sb_be),
+        .master_gnt_i     (sb_gnt),
+        .master_r_valid_i (sb_rvalid),
+        .master_r_rdata_i (sb_rdata),
+
+        // DMI from dmi_jtag
+        .dmi_rst_ni       (rst_ni),
+        .dmi_req_valid_i  (jtag_req_valid),
+        .dmi_req_ready_o  (debug_req_ready),
+        .dmi_req_i        (jtag_dmi_req),
+        .dmi_resp_valid_o (jtag_resp_valid),
+        .dmi_resp_ready_i (jtag_resp_ready),
+        .dmi_resp_o       (debug_resp)
+    );
+
+    assign dm_gnt = dm_req;
+    always_ff @(posedge clk_i or negedge rst_ni) begin
+        if (~rst_ni) dm_rvalid <= 1'b0;
+        else         dm_rvalid <= dm_gnt;
+    end
+
+    SimJTAG #(
+        .TICK_DELAY (1),
+        .PORT       (OPENOCD_PORT)
+    ) i_sim_jtag (
+        .clock          (clk_i),
+        .reset          (~rst_ni),
+        .enable         (1'b1),
+        .init_done      (rst_ni),
+        .jtag_TCK       (sim_jtag_tck),
+        .jtag_TMS       (sim_jtag_tms),
+        .jtag_TDI       (sim_jtag_tdi),
+        .jtag_TRSTn     (sim_jtag_trstn),
+        .jtag_TDO_data  (sim_jtag_tdo),
+        .jtag_TDO_driven(1'b1),
+        .exit           (sim_jtag_exit)
+    );
+
+    always_comb begin
+        if (sim_jtag_exit) $finish(2);
+    end
 
     // axi peripheral
     // data mem

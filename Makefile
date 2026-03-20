@@ -39,6 +39,7 @@ CV32_CORE := $(shell find cv32e40p/rtl -name "*.sv" \
     ! -name "*fpu*" )
 
 RTL_SRC := \
+    riscv-dbg/src/dm_pkg.sv \
     $(CV32_PKG) \
     $(CV32_CORE) \
     cv32e40p/bhv/cv32e40p_sim_clock_gate.sv \
@@ -64,9 +65,16 @@ RTL_SRC := \
     rtl/instr_rom_8kB.sv \
     rtl/boot_rom_1kB.sv \
     rtl/cv32e40p_verilator_top.sv \
+    riscv-dbg/tb/SimJTAG.sv \
+    riscv-dbg/src/dm_pkg.sv \
+    riscv-dbg/src/dm_csrs.sv \
+    riscv-dbg/src/dmi_cdc.sv \
+    riscv-dbg/src/dmi_jtag_tap.sv \
     riscv-dbg/src/dmi_jtag.sv \
+    riscv-dbg/src/dm_mem.sv \
+    riscv-dbg/src/dm_sba.sv \
     riscv-dbg/src/dm_top.sv \
-    riscv-dbg/tb/SimJTAG.sv
+    riscv-dbg/debug_rom/debug_rom.sv  
 
 # Include paths (SystemVerilog packages)
 INCLUDES := \

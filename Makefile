@@ -82,6 +82,7 @@ RTL_SRC := \
     rtl/instr_bus_decoder.sv \
     rtl/instr_rom_8kB.sv \
     rtl/boot_rom_1kB.sv \
+    rtl/axi_to_obi_dm.sv \
     riscv-dbg/src/dm_csrs.sv \
     riscv-dbg/src/dmi_cdc.sv \
     riscv-dbg/src/dmi_jtag_tap.sv \

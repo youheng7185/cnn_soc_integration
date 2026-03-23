@@ -205,7 +205,25 @@ module axi_interconnect (
     input  logic [31:0] s6_axi_rdata,
     input  logic [1:0]  s6_axi_rresp,
     input  logic        s6_axi_rvalid,
-    output logic        s6_axi_rready
+    output logic        s6_axi_rready,
+
+    output logic [31:0] s7_axi_awaddr,   // 12-bit addr to dm_bridge
+    output logic        s7_axi_awvalid,
+    input  logic        s7_axi_awready,
+    output logic [31:0] s7_axi_wdata,
+    output logic [3:0]  s7_axi_wstrb,
+    output logic        s7_axi_wvalid,
+    input  logic        s7_axi_wready,
+    input  logic [1:0]  s7_axi_bresp,
+    input  logic        s7_axi_bvalid,
+    output logic        s7_axi_bready,
+    output logic [31:0] s7_axi_araddr,   // 12-bit addr to dm_bridge
+    output logic        s7_axi_arvalid,
+    input  logic        s7_axi_arready,
+    input  logic [31:0] s7_axi_rdata,
+    input  logic [1:0]  s7_axi_rresp,
+    input  logic        s7_axi_rvalid,
+    output logic        s7_axi_rready
 );
 
     // =====================================================
@@ -218,6 +236,7 @@ module axi_interconnect (
     localparam logic [31:0] I2C_BASE      = 32'h8000_0300;
     localparam logic [31:0] QSPI_BASE     = 32'h8000_0400;
     localparam logic [31:0] CNN_BASE      = 32'h8000_1000;
+    localparam logic [31:0] DM_BASE       = 32'h4000_0000;
 
     // Address mask for data memory (bits [31:28])
     localparam logic [31:0] DATA_MEM_MASK = 32'hF000_0000;
@@ -225,6 +244,7 @@ module axi_interconnect (
     localparam logic [31:0] PERIPH_MASK = 32'hFFFF_FF00;
     // CNN needs different mask (bits [31:12])
     localparam logic [31:0] CNN_MASK = 32'hFFFF_F000;
+    localparam logic [31:0] DM_MASK       = 32'hFFFF_F000;
 
     // =====================================================
     // Slave selection signals
@@ -246,6 +266,9 @@ module axi_interconnect (
             // Check CNN (needs 12-bit mask)
             else if ((m_axi_awaddr & CNN_MASK) == CNN_BASE) begin
                 aw_slave_sel[6] = 1'b1;
+            end
+            else if ((m_axi_awaddr & DM_MASK) == DM_BASE) begin
+                aw_slave_sel[7] = 1'b1;
             end
             // Check other peripherals (8-bit mask)
             else if ((m_axi_awaddr & PERIPH_MASK) == GPIO_BASE) begin
@@ -276,6 +299,9 @@ module axi_interconnect (
             // Check CNN (needs 12-bit mask)
             else if ((m_axi_araddr & CNN_MASK) == CNN_BASE) begin
                 ar_slave_sel[6] = 1'b1;
+            end
+            else if ((m_axi_araddr & DM_MASK) == DM_BASE) begin
+                ar_slave_sel[7] = 1'b1;
             end
             // Check other peripherals (8-bit mask)
             else if ((m_axi_araddr & PERIPH_MASK) == GPIO_BASE) begin
@@ -316,13 +342,17 @@ module axi_interconnect (
     assign s6_axi_awaddr  = m_axi_awaddr;
     assign s6_axi_awvalid = m_axi_awvalid & aw_slave_sel[6];
 
+    assign s7_axi_awaddr  = m_axi_awaddr;
+    assign s7_axi_awvalid = m_axi_awvalid & aw_slave_sel[7];
+
     assign m_axi_awready = (s0_axi_awready & aw_slave_sel[0]) |
                            (s1_axi_awready & aw_slave_sel[1]) |
                            (s2_axi_awready & aw_slave_sel[2]) |
                            (s3_axi_awready & aw_slave_sel[3]) |
                            (s4_axi_awready & aw_slave_sel[4]) |
                            (s5_axi_awready & aw_slave_sel[5]) |
-                           (s6_axi_awready & aw_slave_sel[6]);
+                           (s6_axi_awready & aw_slave_sel[6]) |
+                           (s7_axi_awready & aw_slave_sel[7]);
 
     // =====================================================
     // Write data channel routing
@@ -356,13 +386,18 @@ module axi_interconnect (
     assign s6_axi_wstrb  = m_axi_wstrb;
     assign s6_axi_wvalid = m_axi_wvalid & aw_slave_sel[6];
 
+    assign s7_axi_wdata  = m_axi_wdata;
+    assign s7_axi_wstrb  = m_axi_wstrb;
+    assign s7_axi_wvalid = m_axi_wvalid & aw_slave_sel[7];
+
     assign m_axi_wready = (s0_axi_wready & aw_slave_sel[0]) |
                           (s1_axi_wready & aw_slave_sel[1]) |
                           (s2_axi_wready & aw_slave_sel[2]) |
                           (s3_axi_wready & aw_slave_sel[3]) |
                           (s4_axi_wready & aw_slave_sel[4]) |
                           (s5_axi_wready & aw_slave_sel[5]) |
-                          (s6_axi_wready & aw_slave_sel[6]);
+                          (s6_axi_wready & aw_slave_sel[6]) |
+                          (s7_axi_wready & aw_slave_sel[7]);
 
     // =====================================================
     // Write response channel routing
@@ -374,6 +409,7 @@ module axi_interconnect (
     assign s4_axi_bready = m_axi_bready;
     assign s5_axi_bready = m_axi_bready;
     assign s6_axi_bready = m_axi_bready;
+    assign s7_axi_bready = m_axi_bready;
 
     assign m_axi_bresp  = s0_axi_bvalid ? s0_axi_bresp :
                           s1_axi_bvalid ? s1_axi_bresp :
@@ -382,6 +418,7 @@ module axi_interconnect (
                           s4_axi_bvalid ? s4_axi_bresp :
                           s5_axi_bvalid ? s5_axi_bresp :
                           s6_axi_bvalid ? s6_axi_bresp :
+                          s7_axi_bvalid ? s7_axi_bresp :
                           2'b00;
 
     assign m_axi_bvalid = s0_axi_bvalid |
@@ -390,7 +427,8 @@ module axi_interconnect (
                           s3_axi_bvalid |
                           s4_axi_bvalid |
                           s5_axi_bvalid |
-                          s6_axi_bvalid;
+                          s6_axi_bvalid |
+                          s7_axi_bvalid;
 
     // =====================================================
     // Read address channel routing
@@ -416,13 +454,17 @@ module axi_interconnect (
     assign s6_axi_araddr  = m_axi_araddr;
     assign s6_axi_arvalid = m_axi_arvalid & ar_slave_sel[6];
 
+    assign s7_axi_araddr  = m_axi_araddr[11:0];
+    assign s7_axi_arvalid = m_axi_arvalid & ar_slave_sel[7];
+
     assign m_axi_arready = (s0_axi_arready & ar_slave_sel[0]) |
                            (s1_axi_arready & ar_slave_sel[1]) |
                            (s2_axi_arready & ar_slave_sel[2]) |
                            (s3_axi_arready & ar_slave_sel[3]) |
                            (s4_axi_arready & ar_slave_sel[4]) |
                            (s5_axi_arready & ar_slave_sel[5]) |
-                           (s6_axi_arready & ar_slave_sel[6]);
+                           (s6_axi_arready & ar_slave_sel[6]) |
+                           (s7_axi_arready & ar_slave_sel[7]);
 
     // =====================================================
     // Read data channel routing
@@ -434,6 +476,7 @@ module axi_interconnect (
     assign s4_axi_rready = m_axi_rready;
     assign s5_axi_rready = m_axi_rready;
     assign s6_axi_rready = m_axi_rready;
+    assign s7_axi_rready = m_axi_rready;
 
     assign m_axi_rdata  = s0_axi_rvalid ? s0_axi_rdata :
                           s1_axi_rvalid ? s1_axi_rdata :
@@ -442,6 +485,7 @@ module axi_interconnect (
                           s4_axi_rvalid ? s4_axi_rdata :
                           s5_axi_rvalid ? s5_axi_rdata :
                           s6_axi_rvalid ? s6_axi_rdata :
+                          s7_axi_rvalid ? s7_axi_rdata :
                           32'h0;
 
     assign m_axi_rresp  = s0_axi_rvalid ? s0_axi_rresp :
@@ -451,6 +495,7 @@ module axi_interconnect (
                           s4_axi_rvalid ? s4_axi_rresp :
                           s5_axi_rvalid ? s5_axi_rresp :
                           s6_axi_rvalid ? s6_axi_rresp :
+                          s7_axi_rvalid ? s7_axi_rresp :
                           2'b00;
 
     assign m_axi_rvalid = s0_axi_rvalid |
@@ -459,6 +504,7 @@ module axi_interconnect (
                           s3_axi_rvalid |
                           s4_axi_rvalid |
                           s5_axi_rvalid |
-                          s6_axi_rvalid;
+                          s6_axi_rvalid |
+                          s7_axi_rvalid;
 
 endmodule

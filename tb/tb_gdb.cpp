@@ -23,22 +23,47 @@ int main(int argc, char **argv, char **env)
     tfp->open("waveform.fst");
 
     // init
+    // top->fetch_enable_i = 1;
     top->clk_i  = 0;
     top->rst_ni = 0;
     top->eval();
 
+    vluint64_t last_print = 0;
+
     while (!Verilated::gotFinish()) {
         // release reset after 40 time units
-        if (t > 40)
+        if (t > 1000)
             top->rst_ni = 1;
+        else
+            top->rst_ni = 0;
 
         top->clk_i = !top->clk_i;
         top->eval();
         tfp->dump(t);
+
+        // print debug signals every 1000 ticks on rising edge
+        if (top->clk_i == 1 && t > 1000 && (t - last_print) >= 1000) {
+            last_print = t;
+            printf("t=%lu rst_ni=%d ndmreset=%d "
+                   "havereset=%d running=%d halted=%d "
+                   "debug_req=%d\n",
+                t,
+                (int)top->rst_ni,
+                (int)top->ndmreset_dbg,        // expose if possible
+                (int)top->debug_havereset_o,
+                (int)top->debug_running_o,
+                (int)top->debug_halted_o,
+                (int)top->debug_req_dbg
+            );
+        }
+
         t += 5;
 
         // safety timeout — 100M cycles
-        if (t > 100000000ULL) break;
+        if (t > 100000000ULL) {
+            std::cout << "timeout \n";
+            break;
+        }
     }
 
     tfp->close();

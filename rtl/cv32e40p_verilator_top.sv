@@ -4,7 +4,17 @@ module cv32e40p_verilator_top (
     input logic [15:0] gpio_in,
     output logic [15:0] gpio_out,
     input logic uart_rx_i,
-    output logic uart_tx_o
+    output logic uart_tx_o,
+
+    output logic debug_havereset_o,
+    output logic debug_running_o,
+    output logic debug_halted_o,
+    output logic ndmreset_dbg,
+    output logic debug_req_dbg,
+    output logic        idm_req_dbg,
+    output logic [31:0] idm_addr_dbg,
+    output logic        adm_req_dbg
+
 );
     // =====================
     // CPU data bus wires
@@ -110,6 +120,12 @@ module cv32e40p_verilator_top (
     logic ndmreset_n;
     assign ndmreset_n = rst_ni & ~ndmreset;
 
+    assign debug_havereset_o_dbg = debug_havereset_o;
+    assign debug_running_o_dbg   = debug_running_o;
+    assign debug_halted_o_dbg    = debug_halted_o;
+    assign ndmreset_dbg          = ndmreset;
+    assign debug_req_dbg         = dm_debug_req[0];
+
     cv32e40p_top #(
         .COREV_PULP(0),
         .COREV_CLUSTER(0),
@@ -125,9 +141,9 @@ module cv32e40p_verilator_top (
 
         .boot_addr_i      (32'h0000_0000),
         .mtvec_addr_i     (32'h8000_1E00),
-        .dm_halt_addr_i   (32'h8000_1F00),
+        .dm_halt_addr_i   (32'h1A11_0800),
         .hart_id_i        (32'h0),
-        .dm_exception_addr_i (32'h8000_1F08),
+        .dm_exception_addr_i (32'h1A11_0808),
 
         // instruction bus
         .instr_req_o    (instr_req),
@@ -152,16 +168,16 @@ module cv32e40p_verilator_top (
         .irq_id_o         (),
 
         .debug_req_i      (dm_debug_req[0]),
-        .debug_havereset_o(),
-        .debug_running_o  (),
-        .debug_halted_o   (),
+        .debug_havereset_o(debug_havereset_o),
+        .debug_running_o  (debug_running_o),
+        .debug_halted_o   (debug_halted_o),
         .fetch_enable_i   (1'b1),
         .core_sleep_o     ()
     );
 
     core2axi u_core2axi (
         .clk_i         (clk_i),
-        .rst_ni        (rst_ni),
+        .rst_ni        (ndmreset_n),
 
         // cv32e40p data bus
         .data_req_i    (data_req),
@@ -203,7 +219,7 @@ module cv32e40p_verilator_top (
         .r_ready_o    (axi_r_ready)
     );
 
-    instr_bus_decoder u_instr_decoder (
+    instr_bus_decoder u_instr_dec (
         .instr_req_i    (instr_req),
         .instr_gnt_o    (instr_gnt),
         .instr_rvalid_o (instr_rvalid),
@@ -220,12 +236,19 @@ module cv32e40p_verilator_top (
         .imem_gnt_i     (imem_gnt),
         .imem_rvalid_i  (imem_rvalid),
         .imem_addr_o    (imem_addr),
-        .imem_rdata_i   (imem_rdata)
+        .imem_rdata_i   (imem_rdata),
+
+        // DM slave port ← NEW
+        .dm_req_o       (dm_req),
+        .dm_gnt_i       (dm_gnt),
+        .dm_rvalid_i    (dm_rvalid),
+        .dm_addr_o      (dm_addr),
+        .dm_rdata_i     (dm_rdata)
     );
 
     boot_rom_1kB u_boot_rom (
         .clk_core      (clk_i),
-        .rst_core_n    (rst_ni),
+        .rst_core_n    (ndmreset_n),
 
         .instr_req_i    (boot_req),
         .instr_gnt_o    (boot_gnt),
@@ -236,7 +259,7 @@ module cv32e40p_verilator_top (
 
     instr_rom_8kB u_imem (
         .clk_core      (clk_i),
-        .rst_core_n    (rst_ni),
+        .rst_core_n    (ndmreset_n),
 
         .instr_req_i    (imem_req),
         .instr_gnt_o    (imem_gnt),
@@ -251,7 +274,7 @@ module cv32e40p_verilator_top (
         .IdcodeValue (32'h249511C3)
     ) i_dmi_jtag (
         .clk_i           (clk_i),
-        .rst_ni          (rst_ni),
+        .rst_ni          (ndmreset_n),
         .testmode_i      (1'b0),
         .dmi_req_o       (jtag_dmi_req),
         .dmi_req_valid_o (jtag_req_valid),
@@ -271,43 +294,48 @@ module cv32e40p_verilator_top (
     dm_top #(
         .NrHarts        (NrHarts),
         .BusWidth       (32),
-        .SelectableHarts(SEL_HARTS)
+        .SelectableHarts(SEL_HARTS),
+        .DmBaseAddress  (32'h4000_0000)  // match your AXI address
     ) i_dm_top (
-        .clk_i            (clk_i),
-        .rst_ni           (rst_ni),          // dm_top resets from external only
-        .testmode_i       (1'b0),
-        .ndmreset_o       (ndmreset),        // → combined with rst_ni above
-        .dmactive_o       (),
-        .debug_req_o      (dm_debug_req),    // → core debug_req_i
-        .unavailable_i    (~SEL_HARTS),
-        .hartinfo_i       (HARTINFO),
+        .clk_i                (clk_i),
+        .rst_ni               (ndmreset_n),
+        .next_dm_addr_i       (32'h0),       // no chained DM
+        .testmode_i           (1'b0),
+        .ndmreset_o           (ndmreset),
+        .ndmreset_ack_i       (1'b0),        // tie off, not used in sim
+        .dmactive_o           (),
+        .debug_req_o          (dm_debug_req),
+        .unavailable_i        (~SEL_HARTS),
+        .hartinfo_i           (HARTINFO),
 
-        // slave port — DM register access from bus
-        .slave_req_i      (dm_req),
-        .slave_we_i       (dm_we),
-        .slave_addr_i     (dm_addr),
-        .slave_be_i       (dm_be),
-        .slave_wdata_i    (dm_wdata),
-        .slave_rdata_o    (dm_rdata),
+        // slave port — core fetches debug code here
+        .slave_req_i          (dm_req),
+        .slave_we_i           (dm_we),
+        .slave_addr_i         (dm_addr),
+        .slave_be_i           (dm_be),
+        .slave_wdata_i        (dm_wdata),
+        .slave_rdata_o        (dm_rdata),
 
-        // master port — system bus access (DM reads/writes memory directly)
-        .master_req_o     (sb_req),
-        .master_add_o     (sb_addr),
-        .master_we_o      (sb_we),
-        .master_wdata_o   (sb_wdata),
-        .master_be_o      (sb_be),
-        .master_gnt_i     (sb_gnt),
-        .master_r_valid_i (sb_rvalid),
-        .master_r_rdata_i (sb_rdata),
+        // master port — DM system bus access
+        .master_req_o         (sb_req),
+        .master_add_o         (sb_addr),
+        .master_we_o          (sb_we),
+        .master_wdata_o       (sb_wdata),
+        .master_be_o          (sb_be),
+        .master_gnt_i         (sb_gnt),
+        .master_r_valid_i     (sb_rvalid),
+        .master_r_err_i       (1'b0),        // tie off
+        .master_r_other_err_i (1'b0),        // tie off
+        .master_r_rdata_i     (sb_rdata),
 
         // DMI from dmi_jtag
-        .dmi_rst_ni       (rst_ni),
-        .dmi_req_valid_i  (jtag_req_valid),
-        .dmi_req_ready_o  (debug_req_ready),
-        .dmi_req_i        (jtag_dmi_req),
-        .dmi_resp_valid_o (jtag_resp_valid),
-        .dmi_resp_ready_i (jtag_resp_ready),
-        .dmi_resp_o       (debug_resp)
+        .dmi_rst_ni           (ndmreset_n),
+        .dmi_req_valid_i      (jtag_req_valid),
+        .dmi_req_ready_o      (debug_req_ready),
+        .dmi_req_i            (jtag_dmi_req),
+        .dmi_resp_valid_o     (jtag_resp_valid),
+        .dmi_resp_ready_i     (jtag_resp_ready),
+        .dmi_resp_o           (debug_resp)
     );
 
     assign dm_gnt = dm_req;
@@ -321,9 +349,9 @@ module cv32e40p_verilator_top (
         .PORT       (OPENOCD_PORT)
     ) i_sim_jtag (
         .clock          (clk_i),
-        .reset          (~rst_ni),
+        .reset          (~ndmreset_n),
         .enable         (1'b1),
-        .init_done      (rst_ni),
+        .init_done      (ndmreset_n),
         .jtag_TCK       (sim_jtag_tck),
         .jtag_TMS       (sim_jtag_tms),
         .jtag_TDI       (sim_jtag_tdi),
@@ -487,6 +515,32 @@ module cv32e40p_verilator_top (
     wire        cnn_axi_rvalid;
     wire        cnn_axi_rready;
 
+    // axi to obi dm peripheral
+    // Write address channel
+    logic        dm_axi_awvalid;
+    logic        dm_axi_awready;
+    logic [31:0] dm_axi_awaddr;
+    logic [2:0]  dm_axi_awprot;
+    // Write data channel
+    logic        dm_axi_wvalid;
+    logic        dm_axi_wready;
+    logic [31:0] dm_axi_wdata;
+    logic [3:0]  dm_axi_wstrb;
+    // Write response channel
+    logic        dm_axi_bvalid;
+    logic        dm_axi_bready;
+    logic [1:0]  dm_axi_bresp;
+    // Read address channel
+    logic        dm_axi_arvalid;
+    logic        dm_axi_arready;
+    logic [31:0] dm_axi_araddr;
+    logic [2:0]  dm_axi_arprot;
+    // Read data channel
+    logic        dm_axi_rvalid;
+    logic        dm_axi_rready;
+    logic [31:0] dm_axi_rdata;
+    logic [1:0]  dm_axi_rresp;
+
      // =====================
     // AXI Interconnect (1-to-6)
     // =====================
@@ -645,7 +699,25 @@ module cv32e40p_verilator_top (
         .s6_axi_rdata   (cnn_axi_rdata),
         .s6_axi_rresp   (cnn_axi_rresp),
         .s6_axi_rvalid  (cnn_axi_rvalid),
-        .s6_axi_rready  (cnn_axi_rready)
+        .s6_axi_rready  (cnn_axi_rready),
+
+        .s7_axi_awaddr  (dm_axi_awaddr),
+        .s7_axi_awvalid (dm_axi_awvalid),
+        .s7_axi_awready (dm_axi_awready),
+        .s7_axi_wdata   (dm_axi_wdata),
+        .s7_axi_wstrb   (dm_axi_wstrb),
+        .s7_axi_wvalid  (dm_axi_wvalid),
+        .s7_axi_wready  (dm_axi_wready),
+        .s7_axi_bresp   (dm_axi_bresp),
+        .s7_axi_bvalid  (dm_axi_bvalid),
+        .s7_axi_bready  (dm_axi_bready),
+        .s7_axi_araddr  (dm_axi_araddr),
+        .s7_axi_arvalid (dm_axi_arvalid),
+        .s7_axi_arready (dm_axi_arready),
+        .s7_axi_rdata   (dm_axi_rdata),
+        .s7_axi_rresp   (dm_axi_rresp),
+        .s7_axi_rvalid  (dm_axi_rvalid),
+        .s7_axi_rready  (dm_axi_rready)        
     );
 
     // 13-bit address = 8KB address space
@@ -833,6 +905,45 @@ module cv32e40p_verilator_top (
         .S_AXI_RREADY    (cnn_axi_rready),
         .S_AXI_RDATA     (cnn_axi_rdata),
         .S_AXI_RRESP     (cnn_axi_rresp)
+    );
+
+    axi_to_obi_dm u_axi_dm (
+        .S_AXI_ACLK    (clk_i),
+        .S_AXI_ARESETN (rst_ni),
+
+        .S_AXI_AWVALID (dm_axi_awvalid),
+        .S_AXI_AWREADY (dm_axi_awready),
+        .S_AXI_AWADDR  (dm_axi_awaddr),
+        .S_AXI_AWPROT  (3'b000),
+
+        .S_AXI_WVALID  (dm_axi_wvalid),
+        .S_AXI_WREADY  (dm_axi_wready),
+        .S_AXI_WDATA   (dm_axi_wdata),
+        .S_AXI_WSTRB   (dm_axi_wstrb),
+
+        .S_AXI_BVALID  (dm_axi_bvalid),
+        .S_AXI_BREADY  (dm_axi_bready),
+        .S_AXI_BRESP   (dm_axi_bresp),
+
+        .S_AXI_ARVALID (dm_axi_arvalid),
+        .S_AXI_ARREADY (dm_axi_arready),
+        .S_AXI_ARADDR  (dm_axi_araddr),
+        .S_AXI_ARPROT  (3'b000),
+
+        .S_AXI_RVALID  (dm_axi_rvalid),
+        .S_AXI_RREADY  (dm_axi_rready),
+        .S_AXI_RDATA   (dm_axi_rdata),
+        .S_AXI_RRESP   (dm_axi_rresp),
+
+        // OBI to dm_top slave port
+        .dm_req_o      (dm_req),
+        .dm_we_o       (dm_we),
+        .dm_addr_o     (dm_addr),
+        .dm_be_o       (dm_be),
+        .dm_wdata_o    (dm_wdata),
+        .dm_rdata_i    (dm_rdata),
+        .dm_gnt_i      (dm_gnt),
+        .dm_rvalid_i   (dm_rvalid)
     );
 
 endmodule

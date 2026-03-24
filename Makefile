@@ -51,6 +51,7 @@ RTL_SRC := \
     axi_cnn/first_weights_seperate_filter.sv \
     axi_cnn/mac.sv \
     axi_cnn/prepare_data.sv \
+    axi_cnn/softmax.sv \
     axi_gpio/axi_gpio.sv \
     axi_timer/timer.sv \
     axi_timer/axi_timer.sv \

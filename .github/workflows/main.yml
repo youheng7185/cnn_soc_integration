@@ -1,0 +1,27 @@
+name: Verilator Simulation
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  verilator:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y verilator build-essential
+
+      - name: Show Verilator version
+        run: verilator --version
+
+      - name: Build
+        run: make
+
+      - name: Run simulation
+        run: make run

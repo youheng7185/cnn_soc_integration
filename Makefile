@@ -93,6 +93,11 @@ $(SIM): $(RTL_SRC) $(TB_CPP)
 	$(MAKE) -C $(BUILD_DIR) -f V$(TOP).mk
 
 run: $(SIM)
+	@if [ -d cnn_soc_c_project ]; then \
+		echo "[INFO] Entering cnn_soc_c_project submodule..."; \
+		$(MAKE) -C cnn_soc_c_project clean && $(MAKE) -C cnn_soc_c_project all; \
+		echo "[INFO] Returning to top-level simulation..."; \
+	fi
 	./$(SIM)
 
 wave: run

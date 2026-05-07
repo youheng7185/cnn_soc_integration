@@ -798,9 +798,8 @@ module cv32e40p_verilator_top (
     // =====================================================
     // QSPI (0x8000_0500) - 5-bit address
     // =====================================================
-    axi_qspi_controller #(
-        .C_AXI_ADDR_WIDTH (5),
-        .OPT_LOWPOWER     (1'b0)
+    axi_qspi_verilator #(
+        .C_AXI_ADDR_WIDTH (5)
     ) u_axi_qspi (
         .S_AXI_ACLK    (clk_i),
         .S_AXI_ARESETN (rst_ni),

@@ -63,6 +63,7 @@ RTL_SRC := \
     axi_i2c/axi_i2cm.sv \
     axi_i2c/i2cm_controller.sv \
     axi_i2c/lli2cm.v \
+    axi_qspi/axi_qspi_verilator.sv \
     axi_qspi/axi_qspi_controller.sv \
     axi_qspi/qspi_driver.sv \
     axi_qspi/qspi_master.sv \

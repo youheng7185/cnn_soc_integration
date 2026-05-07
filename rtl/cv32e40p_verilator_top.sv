@@ -1,10 +1,16 @@
 module cv32e40p_verilator_top (
-    input logic clk_i,
-    input logic rst_ni,
-    input logic [15:0] gpio_in,
+    input  logic        clk_i,
+    input  logic        rst_ni,
+    input  logic [15:0] gpio_in,
     output logic [15:0] gpio_out,
-    input logic uart_rx_i,
-    output logic uart_tx_o
+    input  logic        uart0_rx_i,
+    output logic        uart0_tx_o,
+    input  logic        uart1_rx_i,
+    output logic        uart1_tx_o,
+    input  logic        i2c_scl_i,
+    input  logic        i2c_sda_i,
+    output logic        i2c_scl_o,
+    output logic        i2c_sda_o
 );
     // =====================
     // CPU data bus wires
@@ -138,7 +144,7 @@ module cv32e40p_verilator_top (
         .w_data_o     (axi_w_data),
         .w_strb_o     (axi_w_strb),
         .w_valid_o    (axi_w_valid),
-        .w_ready_i   (axi_w_ready),
+        .w_ready_i    (axi_w_ready),
 
         // AXI write response
         .b_resp_i     (axi_b_resp),
@@ -200,8 +206,9 @@ module cv32e40p_verilator_top (
         .instr_rdata_o  (imem_rdata)
     );
 
-    // axi peripheral
-    // data mem
+    // =====================================================
+    // AXI Peripheral wires - Data Memory (0x1000_0000)
+    // =====================================================
     logic [31:0] data_mem_axi_awaddr;
     logic        data_mem_axi_awvalid;
     logic        data_mem_axi_awready;
@@ -220,9 +227,30 @@ module cv32e40p_verilator_top (
     logic        data_mem_axi_rvalid;
     logic        data_mem_axi_rready;
 
-    // =====================
-    // AXI Peripheral wires - GPIO
-    // =====================
+    // =====================================================
+    // AXI Peripheral wires - Instruction Memory (0x2000_0000)
+    // =====================================================
+    logic [31:0] instr_mem_axi_awaddr;
+    logic        instr_mem_axi_awvalid;
+    logic        instr_mem_axi_awready;
+    logic [31:0] instr_mem_axi_wdata;
+    logic [3:0]  instr_mem_axi_wstrb;
+    logic        instr_mem_axi_wvalid;
+    logic        instr_mem_axi_wready;
+    logic [1:0]  instr_mem_axi_bresp;
+    logic        instr_mem_axi_bvalid;
+    logic        instr_mem_axi_bready;
+    logic [31:0] instr_mem_axi_araddr;
+    logic        instr_mem_axi_arvalid;
+    logic        instr_mem_axi_arready;
+    logic [31:0] instr_mem_axi_rdata;
+    logic [1:0]  instr_mem_axi_rresp;
+    logic        instr_mem_axi_rvalid;
+    logic        instr_mem_axi_rready;
+
+    // =====================================================
+    // AXI Peripheral wires - GPIO (0x8000_0000)
+    // =====================================================
     logic [31:0] gpio_axi_awaddr;
     logic        gpio_axi_awvalid;
     logic        gpio_axi_awready;
@@ -241,9 +269,9 @@ module cv32e40p_verilator_top (
     logic        gpio_axi_rvalid;
     logic        gpio_axi_rready;
 
-    // =====================
-    // AXI Peripheral wires - Timer
-    // =====================
+    // =====================================================
+    // AXI Peripheral wires - Timer (0x8000_0100)
+    // =====================================================
     logic [31:0] timer_axi_awaddr;
     logic        timer_axi_awvalid;
     logic        timer_axi_awready;
@@ -260,32 +288,53 @@ module cv32e40p_verilator_top (
     logic [31:0] timer_axi_rdata;
     logic [1:0]  timer_axi_rresp;
     logic        timer_axi_rvalid;
-    logic        timer_axi_rready;    
+    logic        timer_axi_rready;
 
-    // =====================
-    // AXI Peripheral wires - UART
-    // =====================
-    logic [31:0] uart_axi_awaddr;
-    logic        uart_axi_awvalid;
-    logic        uart_axi_awready;
-    logic [31:0] uart_axi_wdata;
-    logic [3:0]  uart_axi_wstrb;
-    logic        uart_axi_wvalid;
-    logic        uart_axi_wready;
-    logic [1:0]  uart_axi_bresp;
-    logic        uart_axi_bvalid;
-    logic        uart_axi_bready;
-    logic [31:0] uart_axi_araddr;
-    logic        uart_axi_arvalid;
-    logic        uart_axi_arready;
-    logic [31:0] uart_axi_rdata;
-    logic [1:0]  uart_axi_rresp;
-    logic        uart_axi_rvalid;
-    logic        uart_axi_rready;
+    // =====================================================
+    // AXI Peripheral wires - UART0 (0x8000_0200)
+    // =====================================================
+    logic [31:0] uart0_axi_awaddr;
+    logic        uart0_axi_awvalid;
+    logic        uart0_axi_awready;
+    logic [31:0] uart0_axi_wdata;
+    logic [3:0]  uart0_axi_wstrb;
+    logic        uart0_axi_wvalid;
+    logic        uart0_axi_wready;
+    logic [1:0]  uart0_axi_bresp;
+    logic        uart0_axi_bvalid;
+    logic        uart0_axi_bready;
+    logic [31:0] uart0_axi_araddr;
+    logic        uart0_axi_arvalid;
+    logic        uart0_axi_arready;
+    logic [31:0] uart0_axi_rdata;
+    logic [1:0]  uart0_axi_rresp;
+    logic        uart0_axi_rvalid;
+    logic        uart0_axi_rready;
 
-    // =====================
-    // AXI Peripheral wires - I2C
-    // =====================
+    // =====================================================
+    // AXI Peripheral wires - UART1 (0x8000_0300)
+    // =====================================================
+    logic [31:0] uart1_axi_awaddr;
+    logic        uart1_axi_awvalid;
+    logic        uart1_axi_awready;
+    logic [31:0] uart1_axi_wdata;
+    logic [3:0]  uart1_axi_wstrb;
+    logic        uart1_axi_wvalid;
+    logic        uart1_axi_wready;
+    logic [1:0]  uart1_axi_bresp;
+    logic        uart1_axi_bvalid;
+    logic        uart1_axi_bready;
+    logic [31:0] uart1_axi_araddr;
+    logic        uart1_axi_arvalid;
+    logic        uart1_axi_arready;
+    logic [31:0] uart1_axi_rdata;
+    logic [1:0]  uart1_axi_rresp;
+    logic        uart1_axi_rvalid;
+    logic        uart1_axi_rready;
+
+    // =====================================================
+    // AXI Peripheral wires - I2C (0x8000_0400)
+    // =====================================================
     logic [31:0] i2c_axi_awaddr;
     logic        i2c_axi_awvalid;
     logic        i2c_axi_awready;
@@ -304,9 +353,9 @@ module cv32e40p_verilator_top (
     logic        i2c_axi_rvalid;
     logic        i2c_axi_rready;
 
-    // =====================
-    // AXI Peripheral wires - QSPI
-    // =====================
+    // =====================================================
+    // AXI Peripheral wires - QSPI (0x8000_0500)
+    // =====================================================
     logic [31:0] qspi_axi_awaddr;
     logic        qspi_axi_awvalid;
     logic        qspi_axi_awready;
@@ -325,35 +374,30 @@ module cv32e40p_verilator_top (
     logic        qspi_axi_rvalid;
     logic        qspi_axi_rready;
 
-    // =====================
-    // AXI Peripheral wires - CNN Accelerator
-    // =====================
-    wire [31:0] cnn_axi_awaddr;
-    wire        cnn_axi_awvalid;
-    wire        cnn_axi_awready;
+    // =====================================================
+    // AXI Peripheral wires - CNN Accelerator (0x8000_1000)
+    // =====================================================
+    logic [31:0] cnn_axi_awaddr;
+    logic        cnn_axi_awvalid;
+    logic        cnn_axi_awready;
+    logic [31:0] cnn_axi_wdata;
+    logic [3:0]  cnn_axi_wstrb;
+    logic        cnn_axi_wvalid;
+    logic        cnn_axi_wready;
+    logic [1:0]  cnn_axi_bresp;
+    logic        cnn_axi_bvalid;
+    logic        cnn_axi_bready;
+    logic [31:0] cnn_axi_araddr;
+    logic        cnn_axi_arvalid;
+    logic        cnn_axi_arready;
+    logic [31:0] cnn_axi_rdata;
+    logic [1:0]  cnn_axi_rresp;
+    logic        cnn_axi_rvalid;
+    logic        cnn_axi_rready;
 
-    wire [31:0] cnn_axi_wdata;
-    wire [3:0]  cnn_axi_wstrb;
-    wire        cnn_axi_wvalid;
-    wire        cnn_axi_wready;
-
-    wire [1:0]  cnn_axi_bresp;
-    wire        cnn_axi_bvalid;
-    wire        cnn_axi_bready;
-
-    wire [31:0] cnn_axi_araddr;
-    wire        cnn_axi_arvalid;
-    wire        cnn_axi_arready;
-
-    wire [31:0] cnn_axi_rdata;
-    wire [1:0]  cnn_axi_rresp;
-    wire        cnn_axi_rvalid;
-    wire        cnn_axi_rready;
-
-     // =====================
-    // AXI Interconnect (1-to-6)
-    // =====================
-
+    // =====================================================
+    // AXI Interconnect (1 master, 9 slaves)
+    // =====================================================
     axi_interconnect u_axi_interconnect (
         .clk_i   (clk_i),
         .rst_ni  (rst_ni),
@@ -396,306 +440,416 @@ module cv32e40p_verilator_top (
         .s0_axi_rvalid  (data_mem_axi_rvalid),
         .s0_axi_rready  (data_mem_axi_rready),
 
-        // Slave 1: GPIO (0x8000_0000) - 4-bit address
-        .s1_axi_awaddr  (gpio_axi_awaddr),
-        .s1_axi_awvalid (gpio_axi_awvalid),
-        .s1_axi_awready (gpio_axi_awready),
-        .s1_axi_wdata   (gpio_axi_wdata),
-        .s1_axi_wstrb   (gpio_axi_wstrb),
-        .s1_axi_wvalid  (gpio_axi_wvalid),
-        .s1_axi_wready  (gpio_axi_wready),
-        .s1_axi_bresp   (gpio_axi_bresp),
-        .s1_axi_bvalid  (gpio_axi_bvalid),
-        .s1_axi_bready  (gpio_axi_bready),
-        .s1_axi_araddr  (gpio_axi_araddr),
-        .s1_axi_arvalid (gpio_axi_arvalid),
-        .s1_axi_arready (gpio_axi_arready),
-        .s1_axi_rdata   (gpio_axi_rdata),
-        .s1_axi_rresp   (gpio_axi_rresp),
-        .s1_axi_rvalid  (gpio_axi_rvalid),
-        .s1_axi_rready  (gpio_axi_rready),
+        // Slave 1: Instruction Memory (0x2000_0000)
+        .s1_axi_awaddr  (instr_mem_axi_awaddr),
+        .s1_axi_awvalid (instr_mem_axi_awvalid),
+        .s1_axi_awready (instr_mem_axi_awready),
+        .s1_axi_wdata   (instr_mem_axi_wdata),
+        .s1_axi_wstrb   (instr_mem_axi_wstrb),
+        .s1_axi_wvalid  (instr_mem_axi_wvalid),
+        .s1_axi_wready  (instr_mem_axi_wready),
+        .s1_axi_bresp   (instr_mem_axi_bresp),
+        .s1_axi_bvalid  (instr_mem_axi_bvalid),
+        .s1_axi_bready  (instr_mem_axi_bready),
+        .s1_axi_araddr  (instr_mem_axi_araddr),
+        .s1_axi_arvalid (instr_mem_axi_arvalid),
+        .s1_axi_arready (instr_mem_axi_arready),
+        .s1_axi_rdata   (instr_mem_axi_rdata),
+        .s1_axi_rresp   (instr_mem_axi_rresp),
+        .s1_axi_rvalid  (instr_mem_axi_rvalid),
+        .s1_axi_rready  (instr_mem_axi_rready),
 
-        // Slave 2: Timer (0x8000_0100) - 5-bit address
-        .s2_axi_awaddr  (timer_axi_awaddr),
-        .s2_axi_awvalid (timer_axi_awvalid),
-        .s2_axi_awready (timer_axi_awready),
-        .s2_axi_wdata   (timer_axi_wdata),
-        .s2_axi_wstrb   (timer_axi_wstrb),
-        .s2_axi_wvalid  (timer_axi_wvalid),
-        .s2_axi_wready  (timer_axi_wready),
-        .s2_axi_bresp   (timer_axi_bresp),
-        .s2_axi_bvalid  (timer_axi_bvalid),
-        .s2_axi_bready  (timer_axi_bready),
-        .s2_axi_araddr  (timer_axi_araddr),
-        .s2_axi_arvalid (timer_axi_arvalid),
-        .s2_axi_arready (timer_axi_arready),
-        .s2_axi_rdata   (timer_axi_rdata),
-        .s2_axi_rresp   (timer_axi_rresp),
-        .s2_axi_rvalid  (timer_axi_rvalid),
-        .s2_axi_rready  (timer_axi_rready),
+        // Slave 2: GPIO (0x8000_0000)
+        .s2_axi_awaddr  (gpio_axi_awaddr),
+        .s2_axi_awvalid (gpio_axi_awvalid),
+        .s2_axi_awready (gpio_axi_awready),
+        .s2_axi_wdata   (gpio_axi_wdata),
+        .s2_axi_wstrb   (gpio_axi_wstrb),
+        .s2_axi_wvalid  (gpio_axi_wvalid),
+        .s2_axi_wready  (gpio_axi_wready),
+        .s2_axi_bresp   (gpio_axi_bresp),
+        .s2_axi_bvalid  (gpio_axi_bvalid),
+        .s2_axi_bready  (gpio_axi_bready),
+        .s2_axi_araddr  (gpio_axi_araddr),
+        .s2_axi_arvalid (gpio_axi_arvalid),
+        .s2_axi_arready (gpio_axi_arready),
+        .s2_axi_rdata   (gpio_axi_rdata),
+        .s2_axi_rresp   (gpio_axi_rresp),
+        .s2_axi_rvalid  (gpio_axi_rvalid),
+        .s2_axi_rready  (gpio_axi_rready),
 
-        // Slave 3: UART (0x8000_0200) - 5-bit address
-        .s3_axi_awaddr  (uart_axi_awaddr),
-        .s3_axi_awvalid (uart_axi_awvalid),
-        .s3_axi_awready (uart_axi_awready),
-        .s3_axi_wdata   (uart_axi_wdata),
-        .s3_axi_wstrb   (uart_axi_wstrb),
-        .s3_axi_wvalid  (uart_axi_wvalid),
-        .s3_axi_wready  (uart_axi_wready),
-        .s3_axi_bresp   (uart_axi_bresp),
-        .s3_axi_bvalid  (uart_axi_bvalid),
-        .s3_axi_bready  (uart_axi_bready),
-        .s3_axi_araddr  (uart_axi_araddr),
-        .s3_axi_arvalid (uart_axi_arvalid),
-        .s3_axi_arready (uart_axi_arready),
-        .s3_axi_rdata   (uart_axi_rdata),
-        .s3_axi_rresp   (uart_axi_rresp),
-        .s3_axi_rvalid  (uart_axi_rvalid),
-        .s3_axi_rready  (uart_axi_rready),
+        // Slave 3: Timer (0x8000_0100)
+        .s3_axi_awaddr  (timer_axi_awaddr),
+        .s3_axi_awvalid (timer_axi_awvalid),
+        .s3_axi_awready (timer_axi_awready),
+        .s3_axi_wdata   (timer_axi_wdata),
+        .s3_axi_wstrb   (timer_axi_wstrb),
+        .s3_axi_wvalid  (timer_axi_wvalid),
+        .s3_axi_wready  (timer_axi_wready),
+        .s3_axi_bresp   (timer_axi_bresp),
+        .s3_axi_bvalid  (timer_axi_bvalid),
+        .s3_axi_bready  (timer_axi_bready),
+        .s3_axi_araddr  (timer_axi_araddr),
+        .s3_axi_arvalid (timer_axi_arvalid),
+        .s3_axi_arready (timer_axi_arready),
+        .s3_axi_rdata   (timer_axi_rdata),
+        .s3_axi_rresp   (timer_axi_rresp),
+        .s3_axi_rvalid  (timer_axi_rvalid),
+        .s3_axi_rready  (timer_axi_rready),
 
-        // Slave 4: I2C (0x8000_0300) - 5-bit address
-        .s4_axi_awaddr  (i2c_axi_awaddr),
-        .s4_axi_awvalid (i2c_axi_awvalid),
-        .s4_axi_awready (i2c_axi_awready),
-        .s4_axi_wdata   (i2c_axi_wdata),
-        .s4_axi_wstrb   (i2c_axi_wstrb),
-        .s4_axi_wvalid  (i2c_axi_wvalid),
-        .s4_axi_wready  (i2c_axi_wready),
-        .s4_axi_bresp   (i2c_axi_bresp),
-        .s4_axi_bvalid  (i2c_axi_bvalid),
-        .s4_axi_bready  (i2c_axi_bready),
-        .s4_axi_araddr  (i2c_axi_araddr),
-        .s4_axi_arvalid (i2c_axi_arvalid),
-        .s4_axi_arready (i2c_axi_arready),
-        .s4_axi_rdata   (i2c_axi_rdata),
-        .s4_axi_rresp   (i2c_axi_rresp),
-        .s4_axi_rvalid  (i2c_axi_rvalid),
-        .s4_axi_rready  (i2c_axi_rready),
+        // Slave 4: UART0 (0x8000_0200)
+        .s4_axi_awaddr  (uart0_axi_awaddr),
+        .s4_axi_awvalid (uart0_axi_awvalid),
+        .s4_axi_awready (uart0_axi_awready),
+        .s4_axi_wdata   (uart0_axi_wdata),
+        .s4_axi_wstrb   (uart0_axi_wstrb),
+        .s4_axi_wvalid  (uart0_axi_wvalid),
+        .s4_axi_wready  (uart0_axi_wready),
+        .s4_axi_bresp   (uart0_axi_bresp),
+        .s4_axi_bvalid  (uart0_axi_bvalid),
+        .s4_axi_bready  (uart0_axi_bready),
+        .s4_axi_araddr  (uart0_axi_araddr),
+        .s4_axi_arvalid (uart0_axi_arvalid),
+        .s4_axi_arready (uart0_axi_arready),
+        .s4_axi_rdata   (uart0_axi_rdata),
+        .s4_axi_rresp   (uart0_axi_rresp),
+        .s4_axi_rvalid  (uart0_axi_rvalid),
+        .s4_axi_rready  (uart0_axi_rready),
 
-        // Slave 5: QSPI (0x8000_0400) - 5-bit address
-        .s5_axi_awaddr  (qspi_axi_awaddr),
-        .s5_axi_awvalid (qspi_axi_awvalid),
-        .s5_axi_awready (qspi_axi_awready),
-        .s5_axi_wdata   (qspi_axi_wdata),
-        .s5_axi_wstrb   (qspi_axi_wstrb),
-        .s5_axi_wvalid  (qspi_axi_wvalid),
-        .s5_axi_wready  (qspi_axi_wready),
-        .s5_axi_bresp   (qspi_axi_bresp),
-        .s5_axi_bvalid  (qspi_axi_bvalid),
-        .s5_axi_bready  (qspi_axi_bready),
-        .s5_axi_araddr  (qspi_axi_araddr),
-        .s5_axi_arvalid (qspi_axi_arvalid),
-        .s5_axi_arready (qspi_axi_arready),
-        .s5_axi_rdata   (qspi_axi_rdata),
-        .s5_axi_rresp   (qspi_axi_rresp),
-        .s5_axi_rvalid  (qspi_axi_rvalid),
-        .s5_axi_rready  (qspi_axi_rready),
+        // Slave 5: UART1 (0x8000_0300)
+        .s5_axi_awaddr  (uart1_axi_awaddr),
+        .s5_axi_awvalid (uart1_axi_awvalid),
+        .s5_axi_awready (uart1_axi_awready),
+        .s5_axi_wdata   (uart1_axi_wdata),
+        .s5_axi_wstrb   (uart1_axi_wstrb),
+        .s5_axi_wvalid  (uart1_axi_wvalid),
+        .s5_axi_wready  (uart1_axi_wready),
+        .s5_axi_bresp   (uart1_axi_bresp),
+        .s5_axi_bvalid  (uart1_axi_bvalid),
+        .s5_axi_bready  (uart1_axi_bready),
+        .s5_axi_araddr  (uart1_axi_araddr),
+        .s5_axi_arvalid (uart1_axi_arvalid),
+        .s5_axi_arready (uart1_axi_arready),
+        .s5_axi_rdata   (uart1_axi_rdata),
+        .s5_axi_rresp   (uart1_axi_rresp),
+        .s5_axi_rvalid  (uart1_axi_rvalid),
+        .s5_axi_rready  (uart1_axi_rready),
 
-        // Slave 6: CNN Accelerator (0x8000_1000)
-        .s6_axi_awaddr  (cnn_axi_awaddr),
-        .s6_axi_awvalid (cnn_axi_awvalid),
-        .s6_axi_awready (cnn_axi_awready),
-        .s6_axi_wdata   (cnn_axi_wdata),
-        .s6_axi_wstrb   (cnn_axi_wstrb),
-        .s6_axi_wvalid  (cnn_axi_wvalid),
-        .s6_axi_wready  (cnn_axi_wready),
-        .s6_axi_bresp   (cnn_axi_bresp),
-        .s6_axi_bvalid  (cnn_axi_bvalid),
-        .s6_axi_bready  (cnn_axi_bready),
-        .s6_axi_araddr  (cnn_axi_araddr),
-        .s6_axi_arvalid (cnn_axi_arvalid),
-        .s6_axi_arready (cnn_axi_arready),
-        .s6_axi_rdata   (cnn_axi_rdata),
-        .s6_axi_rresp   (cnn_axi_rresp),
-        .s6_axi_rvalid  (cnn_axi_rvalid),
-        .s6_axi_rready  (cnn_axi_rready)
+        // Slave 6: I2C (0x8000_0400)
+        .s6_axi_awaddr  (i2c_axi_awaddr),
+        .s6_axi_awvalid (i2c_axi_awvalid),
+        .s6_axi_awready (i2c_axi_awready),
+        .s6_axi_wdata   (i2c_axi_wdata),
+        .s6_axi_wstrb   (i2c_axi_wstrb),
+        .s6_axi_wvalid  (i2c_axi_wvalid),
+        .s6_axi_wready  (i2c_axi_wready),
+        .s6_axi_bresp   (i2c_axi_bresp),
+        .s6_axi_bvalid  (i2c_axi_bvalid),
+        .s6_axi_bready  (i2c_axi_bready),
+        .s6_axi_araddr  (i2c_axi_araddr),
+        .s6_axi_arvalid (i2c_axi_arvalid),
+        .s6_axi_arready (i2c_axi_arready),
+        .s6_axi_rdata   (i2c_axi_rdata),
+        .s6_axi_rresp   (i2c_axi_rresp),
+        .s6_axi_rvalid  (i2c_axi_rvalid),
+        .s6_axi_rready  (i2c_axi_rready),
+
+        // Slave 7: QSPI (0x8000_0500)
+        .s7_axi_awaddr  (qspi_axi_awaddr),
+        .s7_axi_awvalid (qspi_axi_awvalid),
+        .s7_axi_awready (qspi_axi_awready),
+        .s7_axi_wdata   (qspi_axi_wdata),
+        .s7_axi_wstrb   (qspi_axi_wstrb),
+        .s7_axi_wvalid  (qspi_axi_wvalid),
+        .s7_axi_wready  (qspi_axi_wready),
+        .s7_axi_bresp   (qspi_axi_bresp),
+        .s7_axi_bvalid  (qspi_axi_bvalid),
+        .s7_axi_bready  (qspi_axi_bready),
+        .s7_axi_araddr  (qspi_axi_araddr),
+        .s7_axi_arvalid (qspi_axi_arvalid),
+        .s7_axi_arready (qspi_axi_arready),
+        .s7_axi_rdata   (qspi_axi_rdata),
+        .s7_axi_rresp   (qspi_axi_rresp),
+        .s7_axi_rvalid  (qspi_axi_rvalid),
+        .s7_axi_rready  (qspi_axi_rready),
+
+        // Slave 8: CNN Accelerator (0x8000_1000)
+        .s8_axi_awaddr  (cnn_axi_awaddr),
+        .s8_axi_awvalid (cnn_axi_awvalid),
+        .s8_axi_awready (cnn_axi_awready),
+        .s8_axi_wdata   (cnn_axi_wdata),
+        .s8_axi_wstrb   (cnn_axi_wstrb),
+        .s8_axi_wvalid  (cnn_axi_wvalid),
+        .s8_axi_wready  (cnn_axi_wready),
+        .s8_axi_bresp   (cnn_axi_bresp),
+        .s8_axi_bvalid  (cnn_axi_bvalid),
+        .s8_axi_bready  (cnn_axi_bready),
+        .s8_axi_araddr  (cnn_axi_araddr),
+        .s8_axi_arvalid (cnn_axi_arvalid),
+        .s8_axi_arready (cnn_axi_arready),
+        .s8_axi_rdata   (cnn_axi_rdata),
+        .s8_axi_rresp   (cnn_axi_rresp),
+        .s8_axi_rvalid  (cnn_axi_rvalid),
+        .s8_axi_rready  (cnn_axi_rready)
     );
 
-    // 13-bit address = 8KB address space
+    // =====================================================
+    // Data Memory (0x1000_0000) - 13-bit address = 8KB
+    // =====================================================
     axi_data_mem u_axi_data_mem (
         .S_AXI_ACLK    (clk_i),
         .S_AXI_ARESETN (rst_ni),
-        
-        // Write address channel
         .S_AXI_AWVALID (data_mem_axi_awvalid),
         .S_AXI_AWREADY (data_mem_axi_awready),
-        .S_AXI_AWADDR  (data_mem_axi_awaddr[12:0]),  // Use lower 13 bits
-        .S_AXI_AWPROT  (3'b000),                      // Default protection
-        
-        // Write data channel
+        .S_AXI_AWADDR  (data_mem_axi_awaddr[12:0]),
+        .S_AXI_AWPROT  (3'b000),
         .S_AXI_WVALID  (data_mem_axi_wvalid),
         .S_AXI_WREADY  (data_mem_axi_wready),
         .S_AXI_WDATA   (data_mem_axi_wdata),
         .S_AXI_WSTRB   (data_mem_axi_wstrb),
-        
-        // Write response channel
         .S_AXI_BVALID  (data_mem_axi_bvalid),
         .S_AXI_BREADY  (data_mem_axi_bready),
         .S_AXI_BRESP   (data_mem_axi_bresp),
-        
-        // Read address channel
         .S_AXI_ARVALID (data_mem_axi_arvalid),
         .S_AXI_ARREADY (data_mem_axi_arready),
-        .S_AXI_ARADDR  (data_mem_axi_araddr[12:0]),  // Use lower 13 bits
-        .S_AXI_ARPROT  (3'b000),                      // Default protection
-        
-        // Read data channel
+        .S_AXI_ARADDR  (data_mem_axi_araddr[12:0]),
+        .S_AXI_ARPROT  (3'b000),
         .S_AXI_RVALID  (data_mem_axi_rvalid),
         .S_AXI_RREADY  (data_mem_axi_rready),
         .S_AXI_RDATA   (data_mem_axi_rdata),
         .S_AXI_RRESP   (data_mem_axi_rresp)
     );
 
-    // =====================
-    // GPIO Peripheral (0x8000_0000)
-    // 4-bit address
-    // =====================
+    // =====================================================
+    // Instruction Memory (0x2000_0000) - 13-bit address = 8KB
+    // =====================================================
+    // axi_instr_mem u_axi_instr_mem (
+    //     .S_AXI_ACLK    (clk_i),
+    //     .S_AXI_ARESETN (rst_ni),
+    //     .S_AXI_AWVALID (instr_mem_axi_awvalid),
+    //     .S_AXI_AWREADY (instr_mem_axi_awready),
+    //     .S_AXI_AWADDR  (instr_mem_axi_awaddr[12:0]),
+    //     .S_AXI_AWPROT  (3'b000),
+    //     .S_AXI_WVALID  (instr_mem_axi_wvalid),
+    //     .S_AXI_WREADY  (instr_mem_axi_wready),
+    //     .S_AXI_WDATA   (instr_mem_axi_wdata),
+    //     .S_AXI_WSTRB   (instr_mem_axi_wstrb),
+    //     .S_AXI_BVALID  (instr_mem_axi_bvalid),
+    //     .S_AXI_BREADY  (instr_mem_axi_bready),
+    //     .S_AXI_BRESP   (instr_mem_axi_bresp),
+    //     .S_AXI_ARVALID (instr_mem_axi_arvalid),
+    //     .S_AXI_ARREADY (instr_mem_axi_arready),
+    //     .S_AXI_ARADDR  (instr_mem_axi_araddr[12:0]),
+    //     .S_AXI_ARPROT  (3'b000),
+    //     .S_AXI_RVALID  (instr_mem_axi_rvalid),
+    //     .S_AXI_RREADY  (instr_mem_axi_rready),
+    //     .S_AXI_RDATA   (instr_mem_axi_rdata),
+    //     .S_AXI_RRESP   (instr_mem_axi_rresp)
+    // );
+
+    // =====================================================
+    // GPIO (0x8000_0000) - 4-bit address
+    // =====================================================
     axi_gpio u_axi_gpio (
         .S_AXI_ACLK    (clk_i),
         .S_AXI_ARESETN (rst_ni),
-
-        // Write address channel
         .S_AXI_AWVALID (gpio_axi_awvalid),
         .S_AXI_AWREADY (gpio_axi_awready),
         .S_AXI_AWADDR  (gpio_axi_awaddr[3:0]),
         .S_AXI_AWPROT  (3'b000),
-
-        // Write data channel
         .S_AXI_WVALID  (gpio_axi_wvalid),
         .S_AXI_WREADY  (gpio_axi_wready),
         .S_AXI_WDATA   (gpio_axi_wdata),
         .S_AXI_WSTRB   (gpio_axi_wstrb),
-
-        // Write response
         .S_AXI_BVALID  (gpio_axi_bvalid),
         .S_AXI_BREADY  (gpio_axi_bready),
         .S_AXI_BRESP   (gpio_axi_bresp),
-
-        // Read address channel
         .S_AXI_ARVALID (gpio_axi_arvalid),
         .S_AXI_ARREADY (gpio_axi_arready),
         .S_AXI_ARADDR  (gpio_axi_araddr[3:0]),
         .S_AXI_ARPROT  (3'b000),
-
-        // Read data channel
         .S_AXI_RVALID  (gpio_axi_rvalid),
         .S_AXI_RREADY  (gpio_axi_rready),
         .S_AXI_RDATA   (gpio_axi_rdata),
         .S_AXI_RRESP   (gpio_axi_rresp),
-
-        // GPIO pins
         .gpio_in       (gpio_in),
         .gpio_out      (gpio_out)
     );
 
-    // =====================
-    // Timer Peripheral (0x8000_0100)
-    // 5-bit address
-    // =====================
+    // =====================================================
+    // Timer (0x8000_0100) - 5-bit address
+    // =====================================================
     axi_timer u_axi_timer (
         .S_AXI_ACLK    (clk_i),
         .S_AXI_ARESETN (rst_ni),
-
-        // Write address channel
         .S_AXI_AWVALID (timer_axi_awvalid),
         .S_AXI_AWREADY (timer_axi_awready),
         .S_AXI_AWADDR  (timer_axi_awaddr[4:0]),
         .S_AXI_AWPROT  (3'b000),
-
-        // Write data channel
         .S_AXI_WVALID  (timer_axi_wvalid),
         .S_AXI_WREADY  (timer_axi_wready),
         .S_AXI_WDATA   (timer_axi_wdata),
         .S_AXI_WSTRB   (timer_axi_wstrb),
-
-        // Write response
         .S_AXI_BVALID  (timer_axi_bvalid),
         .S_AXI_BREADY  (timer_axi_bready),
         .S_AXI_BRESP   (timer_axi_bresp),
-
-        // Read address channel
         .S_AXI_ARVALID (timer_axi_arvalid),
         .S_AXI_ARREADY (timer_axi_arready),
         .S_AXI_ARADDR  (timer_axi_araddr[4:0]),
         .S_AXI_ARPROT  (3'b000),
-
-        // Read data channel
         .S_AXI_RVALID  (timer_axi_rvalid),
         .S_AXI_RREADY  (timer_axi_rready),
         .S_AXI_RDATA   (timer_axi_rdata),
         .S_AXI_RRESP   (timer_axi_rresp)
     );
 
-    // =====================
-    // UART Peripheral (0x8000_0200)
-    // 5-bit address
-    // =====================
-    axi_uart u_axi_uart (
+    // =====================================================
+    // UART0 (0x8000_0200) - 5-bit address
+    // =====================================================
+    axi_uart u_axi_uart0 (
         .S_AXI_ACLK    (clk_i),
         .S_AXI_ARESETN (rst_ni),
-
-        // Write address channel
-        .S_AXI_AWVALID (uart_axi_awvalid),
-        .S_AXI_AWREADY (uart_axi_awready),
-        .S_AXI_AWADDR  (uart_axi_awaddr[4:0]),
+        .S_AXI_AWVALID (uart0_axi_awvalid),
+        .S_AXI_AWREADY (uart0_axi_awready),
+        .S_AXI_AWADDR  (uart0_axi_awaddr[4:0]),
         .S_AXI_AWPROT  (3'b000),
-
-        // Write data channel
-        .S_AXI_WVALID  (uart_axi_wvalid),
-        .S_AXI_WREADY  (uart_axi_wready),
-        .S_AXI_WDATA   (uart_axi_wdata),
-        .S_AXI_WSTRB   (uart_axi_wstrb),
-
-        // Write response
-        .S_AXI_BVALID  (uart_axi_bvalid),
-        .S_AXI_BREADY  (uart_axi_bready),
-        .S_AXI_BRESP   (uart_axi_bresp),
-
-        // Read address channel
-        .S_AXI_ARVALID (uart_axi_arvalid),
-        .S_AXI_ARREADY (uart_axi_arready),
-        .S_AXI_ARADDR  (uart_axi_araddr[4:0]),
+        .S_AXI_WVALID  (uart0_axi_wvalid),
+        .S_AXI_WREADY  (uart0_axi_wready),
+        .S_AXI_WDATA   (uart0_axi_wdata),
+        .S_AXI_WSTRB   (uart0_axi_wstrb),
+        .S_AXI_BVALID  (uart0_axi_bvalid),
+        .S_AXI_BREADY  (uart0_axi_bready),
+        .S_AXI_BRESP   (uart0_axi_bresp),
+        .S_AXI_ARVALID (uart0_axi_arvalid),
+        .S_AXI_ARREADY (uart0_axi_arready),
+        .S_AXI_ARADDR  (uart0_axi_araddr[4:0]),
         .S_AXI_ARPROT  (3'b000),
-
-        // Read data channel
-        .S_AXI_RVALID  (uart_axi_rvalid),
-        .S_AXI_RREADY  (uart_axi_rready),
-        .S_AXI_RDATA   (uart_axi_rdata),
-        .S_AXI_RRESP   (uart_axi_rresp),
-
-        // UART signals
-        .uart_rx_i     (uart_rx_i),
-        .uart_tx_o     (uart_tx_o)
+        .S_AXI_RVALID  (uart0_axi_rvalid),
+        .S_AXI_RREADY  (uart0_axi_rready),
+        .S_AXI_RDATA   (uart0_axi_rdata),
+        .S_AXI_RRESP   (uart0_axi_rresp),
+        .uart_rx_i     (uart0_rx_i),
+        .uart_tx_o     (uart0_tx_o)
     );
-    
 
+    // =====================================================
+    // UART1 (0x8000_0300) - 5-bit address
+    // =====================================================
+    axi_uart u_axi_uart1 (
+        .S_AXI_ACLK    (clk_i),
+        .S_AXI_ARESETN (rst_ni),
+        .S_AXI_AWVALID (uart1_axi_awvalid),
+        .S_AXI_AWREADY (uart1_axi_awready),
+        .S_AXI_AWADDR  (uart1_axi_awaddr[4:0]),
+        .S_AXI_AWPROT  (3'b000),
+        .S_AXI_WVALID  (uart1_axi_wvalid),
+        .S_AXI_WREADY  (uart1_axi_wready),
+        .S_AXI_WDATA   (uart1_axi_wdata),
+        .S_AXI_WSTRB   (uart1_axi_wstrb),
+        .S_AXI_BVALID  (uart1_axi_bvalid),
+        .S_AXI_BREADY  (uart1_axi_bready),
+        .S_AXI_BRESP   (uart1_axi_bresp),
+        .S_AXI_ARVALID (uart1_axi_arvalid),
+        .S_AXI_ARREADY (uart1_axi_arready),
+        .S_AXI_ARADDR  (uart1_axi_araddr[4:0]),
+        .S_AXI_ARPROT  (3'b000),
+        .S_AXI_RVALID  (uart1_axi_rvalid),
+        .S_AXI_RREADY  (uart1_axi_rready),
+        .S_AXI_RDATA   (uart1_axi_rdata),
+        .S_AXI_RRESP   (uart1_axi_rresp),
+        .uart_rx_i     (uart1_rx_i),
+        .uart_tx_o     (uart1_tx_o)
+    );
+
+    // =====================================================
+    // I2C (0x8000_0400) - 5-bit address
+    // =====================================================
+    axi_i2cm #(
+        .C_AXI_ADDR_WIDTH (5),
+        .OPT_LOWPOWER     (1'b0)
+    ) u_axi_i2c (
+        .S_AXI_ACLK    (clk_i),
+        .S_AXI_ARESETN (rst_ni),
+        .S_AXI_AWVALID (i2c_axi_awvalid),
+        .S_AXI_AWREADY (i2c_axi_awready),
+        .S_AXI_AWADDR  (i2c_axi_awaddr[4:0]),
+        .S_AXI_AWPROT  (3'b000),
+        .S_AXI_WVALID  (i2c_axi_wvalid),
+        .S_AXI_WREADY  (i2c_axi_wready),
+        .S_AXI_WDATA   (i2c_axi_wdata),
+        .S_AXI_WSTRB   (i2c_axi_wstrb),
+        .S_AXI_BVALID  (i2c_axi_bvalid),
+        .S_AXI_BREADY  (i2c_axi_bready),
+        .S_AXI_BRESP   (i2c_axi_bresp),
+        .S_AXI_ARVALID (i2c_axi_arvalid),
+        .S_AXI_ARREADY (i2c_axi_arready),
+        .S_AXI_ARADDR  (i2c_axi_araddr[4:0]),
+        .S_AXI_ARPROT  (3'b000),
+        .S_AXI_RVALID  (i2c_axi_rvalid),
+        .S_AXI_RREADY  (i2c_axi_rready),
+        .S_AXI_RDATA   (i2c_axi_rdata),
+        .S_AXI_RRESP   (i2c_axi_rresp),
+        .i_scl         (i2c_scl_i),
+        .i_sda         (i2c_sda_i),
+        .o_scl         (i2c_scl_o),
+        .o_sda         (i2c_sda_o)
+    );
+
+    // =====================================================
+    // QSPI (0x8000_0500) - 5-bit address
+    // =====================================================
+    axi_qspi_controller #(
+        .C_AXI_ADDR_WIDTH (5),
+        .OPT_LOWPOWER     (1'b0)
+    ) u_axi_qspi (
+        .S_AXI_ACLK    (clk_i),
+        .S_AXI_ARESETN (rst_ni),
+        .S_AXI_AWVALID (qspi_axi_awvalid),
+        .S_AXI_AWREADY (qspi_axi_awready),
+        .S_AXI_AWADDR  (qspi_axi_awaddr[4:0]),
+        .S_AXI_AWPROT  (3'b000),
+        .S_AXI_WVALID  (qspi_axi_wvalid),
+        .S_AXI_WREADY  (qspi_axi_wready),
+        .S_AXI_WDATA   (qspi_axi_wdata),
+        .S_AXI_WSTRB   (qspi_axi_wstrb),
+        .S_AXI_BVALID  (qspi_axi_bvalid),
+        .S_AXI_BREADY  (qspi_axi_bready),
+        .S_AXI_BRESP   (qspi_axi_bresp),
+        .S_AXI_ARVALID (qspi_axi_arvalid),
+        .S_AXI_ARREADY (qspi_axi_arready),
+        .S_AXI_ARADDR  (qspi_axi_araddr[4:0]),
+        .S_AXI_ARPROT  (3'b000),
+        .S_AXI_RVALID  (qspi_axi_rvalid),
+        .S_AXI_RREADY  (qspi_axi_rready),
+        .S_AXI_RDATA   (qspi_axi_rdata),
+        .S_AXI_RRESP   (qspi_axi_rresp)
+    );
+
+    // =====================================================
+    // CNN Accelerator (0x8000_1000) - 12-bit address
+    // =====================================================
     axi_cnn u_axi_cnn (
-        .S_AXI_ACLK      (clk_i),
-        .S_AXI_ARESETN   (rst_ni),
-
-        .S_AXI_AWVALID   (cnn_axi_awvalid),
-        .S_AXI_AWREADY   (cnn_axi_awready),
-        .S_AXI_AWADDR    (cnn_axi_awaddr[11:0]),
-        .S_AXI_AWPROT    (3'b000),
-
-        .S_AXI_WVALID    (cnn_axi_wvalid),
-        .S_AXI_WREADY    (cnn_axi_wready),
-        .S_AXI_WDATA     (cnn_axi_wdata),
-        .S_AXI_WSTRB     (cnn_axi_wstrb),
-
-        .S_AXI_BVALID    (cnn_axi_bvalid),
-        .S_AXI_BREADY    (cnn_axi_bready),
-        .S_AXI_BRESP     (cnn_axi_bresp),
-
-        .S_AXI_ARVALID   (cnn_axi_arvalid),
-        .S_AXI_ARREADY   (cnn_axi_arready),
-        .S_AXI_ARADDR    (cnn_axi_araddr[11:0]),
-        .S_AXI_ARPROT    (3'b000),
-
-        .S_AXI_RVALID    (cnn_axi_rvalid),
-        .S_AXI_RREADY    (cnn_axi_rready),
-        .S_AXI_RDATA     (cnn_axi_rdata),
-        .S_AXI_RRESP     (cnn_axi_rresp)
+        .S_AXI_ACLK    (clk_i),
+        .S_AXI_ARESETN (rst_ni),
+        .S_AXI_AWVALID (cnn_axi_awvalid),
+        .S_AXI_AWREADY (cnn_axi_awready),
+        .S_AXI_AWADDR  (cnn_axi_awaddr[11:0]),
+        .S_AXI_AWPROT  (3'b000),
+        .S_AXI_WVALID  (cnn_axi_wvalid),
+        .S_AXI_WREADY  (cnn_axi_wready),
+        .S_AXI_WDATA   (cnn_axi_wdata),
+        .S_AXI_WSTRB   (cnn_axi_wstrb),
+        .S_AXI_BVALID  (cnn_axi_bvalid),
+        .S_AXI_BREADY  (cnn_axi_bready),
+        .S_AXI_BRESP   (cnn_axi_bresp),
+        .S_AXI_ARVALID (cnn_axi_arvalid),
+        .S_AXI_ARREADY (cnn_axi_arready),
+        .S_AXI_ARADDR  (cnn_axi_araddr[11:0]),
+        .S_AXI_ARPROT  (3'b000),
+        .S_AXI_RVALID  (cnn_axi_rvalid),
+        .S_AXI_RREADY  (cnn_axi_rready),
+        .S_AXI_RDATA   (cnn_axi_rdata),
+        .S_AXI_RRESP   (cnn_axi_rresp)
     );
 
 endmodule

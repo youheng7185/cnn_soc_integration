@@ -60,6 +60,15 @@ RTL_SRC := \
     axi_uart/uart_rx.sv \
     axi_uart/uart_tx.sv \
     axi_data_mem/axi_data_mem.sv \
+    axi_i2c/axi_i2cm.sv \
+    axi_i2c/i2cm_controller.sv \
+    axi_i2c/lli2cm.v \
+    axi_qspi/axi_qspi_controller.sv \
+    axi_qspi/qspi_driver.sv \
+    axi_qspi/qspi_master.sv \
+    axi_qspi/qspi_flash_model.sv \
+    axi_qspi/qspi_controller.sv \
+    axi_qspi/clk_divider.sv \
     rtl/axi_interconnect.sv \
     rtl/instr_bus_decoder.sv \
     rtl/instr_rom_8kB.sv \

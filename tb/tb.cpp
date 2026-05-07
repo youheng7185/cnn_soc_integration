@@ -23,7 +23,7 @@ int main(int argc, char **argv) {
     tick(5, dut, tfp);
     
     dut->rst_ni = 1;
-    dut->uart_rx_i = 1; // not active
+    dut->uart0_rx_i = 1; // not active
     dut->gpio_in = 0xABAB;
 
     tick(100000, dut, tfp);
@@ -74,7 +74,7 @@ void uart_send_byte(Vcv32e40p_verilator_top *dut, VerilatedFstC* tfp, uint8_t da
     const int BIT_CYCLES = 217;
 
     auto drive = [&](int val) {
-        dut->uart_rx_i = val;
+        dut->uart0_rx_i = val;
         tick(BIT_CYCLES, dut, tfp);
     };
 

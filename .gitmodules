@@ -3,28 +3,28 @@
 	url = https://github.com/openhwgroup/cv32e40p.git
 [submodule "axi_gpio"]
 	path = axi_gpio
-	url = https://github.com/youheng7185/axi_gpio.git
+	url = https://github.com/youheng7185/2026_rv1480_axi_gpio.git
 [submodule "core2axi"]
 	path = core2axi
-	url = https://github.com/youheng7185/core2axi.git
+	url = https://github.com/youheng7185/2026_rv1480_core2axi.git
 [submodule "cnn_soc_c_project"]
 	path = cnn_soc_c_project
-	url = https://github.com/youheng7185/cnn_soc_c_project.git
+	url = https://github.com/youheng7185/2026_rv1480_cnn_soc_c_project.git
 [submodule "axi_timer"]
 	path = axi_timer
-	url = https://github.com/youheng7185/axi_timer.git
+	url = https://github.com/youheng7185/2026_rv1480_axi_timer.git
 [submodule "axi_uart"]
 	path = axi_uart
-	url = https://github.com/youheng7185/axi_uart.git
+	url = https://github.com/youheng7185/2026_rv1480_axi_uart.git
 [submodule "axi_cnn"]
 	path = axi_cnn
-	url = https://github.com/youheng7185/CNN_CORE_HDL.git
+	url = https://github.com/youheng7185/2026_rv1480_CNN_CORE_HDL.git
 [submodule "axi_data_mem"]
 	path = axi_data_mem
-	url = https://github.com/youheng7185/axi_data_mem.git
+	url = https://github.com/youheng7185/2026_rv1480_axi_data_mem.git
 [submodule "axi_qspi"]
 	path = axi_qspi
-	url = https://github.com/wcr490/qspi_controller.git
+	url = https://github.com/wcr490/2026_rv1480_qspi_controller.git
 [submodule "axi_i2c"]
 	path = axi_i2c
-	url = https://github.com/wcr490/i2c_controller.git
+	url = https://github.com/wcr490/2026_rv1480_i2c_controller.git

@@ -22,9 +22,9 @@
 [submodule "2026_rv1480_axi_data_mem"]
 	path = axi_data_mem
 	url = https://github.com/youheng7185/2026_rv1480_axi_data_mem.git
-[submodule "2026_rv1480_axi_qspi"]
+[submodule "2026_rv1480_axi_qspi_master"]
 	path = axi_qspi
-	url = https://github.com/wcr490/2026_rv1480_qspi_controller.git
-[submodule "2026_rv1480_axi_i2c"]
+	url = https://github.com/wcr490/2026_rv1480_axi_qspi_master.git
+[submodule "2026_rv1480_axi_iic_master"]
 	path = axi_i2c
-	url = https://github.com/wcr490/2026_rv1480_i2c_controller.git
+	url = https://github.com/wcr490/2026_rv1480_axi_iic_master.git

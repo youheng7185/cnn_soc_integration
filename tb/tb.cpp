@@ -28,20 +28,12 @@ int main(int argc, char **argv) {
 
     tick(100000, dut, tfp);
 
-    for (uint32_t i = 0; i < 1960; i++) {
-        uart_send_byte(dut, tfp, conv2d_input_no[i]);
+    // uncomment this to run inference
+    // for (uint32_t i = 0; i < 1960; i++) {
+    //     uart_send_byte(dut, tfp, conv2d_input_no[i]);
+    // }  
 
-        // if (i == 10) {
-        //     dut->final();
-        //     tfp->close();
-        //     delete tfp;
-        //     delete dut;
-            
-        //     return 0;
-        // }
-    }  
-
-    tick(500000, dut, tfp); // let it process
+    tick(100000, dut, tfp); // let it process
     
     // Access internal signal through rootp
     //std::cout << "mem_req = " << (int)dut->rootp->cv32e40p_verilator_top__DOT__mem_req << std::endl;

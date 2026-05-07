@@ -22,3 +22,9 @@
 [submodule "axi_data_mem"]
 	path = axi_data_mem
 	url = https://github.com/youheng7185/axi_data_mem.git
+[submodule "axi_qspi"]
+	path = axi_qspi
+	url = https://github.com/wcr490/qspi_controller.git
+[submodule "axi_i2c"]
+	path = axi_i2c
+	url = https://github.com/wcr490/i2c_controller.git

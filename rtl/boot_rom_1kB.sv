@@ -1,6 +1,6 @@
 module boot_rom_1kB (
-    input logic clk_core,
-    input logic rst_core_n,
+    input logic clk_i,
+    input logic rst_ni,
 
     input logic instr_req_i,
     output logic instr_gnt_o,
@@ -25,8 +25,8 @@ module boot_rom_1kB (
         end
     end
     
-    always_ff @(posedge clk_core or negedge rst_core_n) begin
-        if (!rst_core_n) begin
+    always_ff @(posedge clk_i or negedge rst_ni) begin
+        if (!rst_ni) begin
             instr_rvalid_o <= 1'b0;
             rdata_q <= 32'b0;
         end else begin

@@ -185,8 +185,8 @@ module cv32e40p_verilator_top (
     );
 
     boot_rom_1kB u_boot_rom (
-        .clk_core      (clk_i),
-        .rst_core_n    (rst_ni),
+        .clk_i         (clk_i),
+        .rst_ni        (rst_ni),
 
         .instr_req_i    (boot_req),
         .instr_gnt_o    (boot_gnt),
@@ -196,8 +196,8 @@ module cv32e40p_verilator_top (
     );
 
     instr_rom_8kB u_imem (
-        .clk_core      (clk_i),
-        .rst_core_n    (rst_ni),
+        .clk_i         (clk_i),
+        .rst_ni        (rst_ni),
 
         .instr_req_i    (imem_req),
         .instr_gnt_o    (imem_gnt),

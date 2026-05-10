@@ -1,261 +1,261 @@
 module axi_interconnect (
-    input logic clk_i,
-    input logic rst_ni,
+    input wire clk_i,
+    input wire rst_ni,
 
     // =====================================================
     // Master interface (from core2axi)
     // =====================================================
     // Write address channel
-    input  logic [31:0] m_axi_awaddr,
-    input  logic        m_axi_awvalid,
-    output logic        m_axi_awready,
+    input  wire [31:0] m_axi_awaddr,
+    input  wire        m_axi_awvalid,
+    output wire        m_axi_awready,
 
     // Write data channel
-    input  logic [31:0] m_axi_wdata,
-    input  logic [3:0]  m_axi_wstrb,
-    input  logic        m_axi_wvalid,
-    output logic        m_axi_wready,
+    input  wire [31:0] m_axi_wdata,
+    input  wire [3:0]  m_axi_wstrb,
+    input  wire        m_axi_wvalid,
+    output wire        m_axi_wready,
 
     // Write response channel
-    output logic [1:0]  m_axi_bresp,
-    output logic        m_axi_bvalid,
-    input  logic        m_axi_bready,
+    output wire [1:0]  m_axi_bresp,
+    output wire        m_axi_bvalid,
+    input  wire        m_axi_bready,
 
     // Read address channel
-    input  logic [31:0] m_axi_araddr,
-    input  logic        m_axi_arvalid,
-    output logic        m_axi_arready,
+    input  wire [31:0] m_axi_araddr,
+    input  wire        m_axi_arvalid,
+    output wire        m_axi_arready,
 
     // Read data channel
-    output logic [31:0] m_axi_rdata,
-    output logic [1:0]  m_axi_rresp,
-    output logic        m_axi_rvalid,
-    input  logic        m_axi_rready,
+    output wire [31:0] m_axi_rdata,
+    output wire [1:0]  m_axi_rresp,
+    output wire        m_axi_rvalid,
+    input  wire        m_axi_rready,
 
     // =====================================================
     // Slave 0: Data Memory (0x1000_0000, 8KB)
     // =====================================================
-    output logic [31:0] s0_axi_awaddr,
-    output logic        s0_axi_awvalid,
-    input  logic        s0_axi_awready,
+    output wire [31:0] s0_axi_awaddr,
+    output wire        s0_axi_awvalid,
+    input  wire        s0_axi_awready,
 
-    output logic [31:0] s0_axi_wdata,
-    output logic [3:0]  s0_axi_wstrb,
-    output logic        s0_axi_wvalid,
-    input  logic        s0_axi_wready,
+    output wire [31:0] s0_axi_wdata,
+    output wire [3:0]  s0_axi_wstrb,
+    output wire        s0_axi_wvalid,
+    input  wire        s0_axi_wready,
 
-    input  logic [1:0]  s0_axi_bresp,
-    input  logic        s0_axi_bvalid,
-    output logic        s0_axi_bready,
+    input  wire [1:0]  s0_axi_bresp,
+    input  wire        s0_axi_bvalid,
+    output wire        s0_axi_bready,
 
-    output logic [31:0] s0_axi_araddr,
-    output logic        s0_axi_arvalid,
-    input  logic        s0_axi_arready,
+    output wire [31:0] s0_axi_araddr,
+    output wire        s0_axi_arvalid,
+    input  wire        s0_axi_arready,
 
-    input  logic [31:0] s0_axi_rdata,
-    input  logic [1:0]  s0_axi_rresp,
-    input  logic        s0_axi_rvalid,
-    output logic        s0_axi_rready,
+    input  wire [31:0] s0_axi_rdata,
+    input  wire [1:0]  s0_axi_rresp,
+    input  wire        s0_axi_rvalid,
+    output wire        s0_axi_rready,
 
     // =====================================================
     // Slave 1: Instruction Memory (0x2000_0000, 8KB)
     // =====================================================
-    output logic [31:0] s1_axi_awaddr,
-    output logic        s1_axi_awvalid,
-    input  logic        s1_axi_awready,
+    output wire [31:0] s1_axi_awaddr,
+    output wire        s1_axi_awvalid,
+    input  wire        s1_axi_awready,
 
-    output logic [31:0] s1_axi_wdata,
-    output logic [3:0]  s1_axi_wstrb,
-    output logic        s1_axi_wvalid,
-    input  logic        s1_axi_wready,
+    output wire [31:0] s1_axi_wdata,
+    output wire [3:0]  s1_axi_wstrb,
+    output wire        s1_axi_wvalid,
+    input  wire        s1_axi_wready,
 
-    input  logic [1:0]  s1_axi_bresp,
-    input  logic        s1_axi_bvalid,
-    output logic        s1_axi_bready,
+    input  wire [1:0]  s1_axi_bresp,
+    input  wire        s1_axi_bvalid,
+    output wire        s1_axi_bready,
 
-    output logic [31:0] s1_axi_araddr,
-    output logic        s1_axi_arvalid,
-    input  logic        s1_axi_arready,
+    output wire [31:0] s1_axi_araddr,
+    output wire        s1_axi_arvalid,
+    input  wire        s1_axi_arready,
 
-    input  logic [31:0] s1_axi_rdata,
-    input  logic [1:0]  s1_axi_rresp,
-    input  logic        s1_axi_rvalid,
-    output logic        s1_axi_rready,
+    input  wire [31:0] s1_axi_rdata,
+    input  wire [1:0]  s1_axi_rresp,
+    input  wire        s1_axi_rvalid,
+    output wire        s1_axi_rready,
 
     // =====================================================
     // Slave 2: GPIO (0x8000_0000)
     // =====================================================
-    output logic [31:0] s2_axi_awaddr,
-    output logic        s2_axi_awvalid,
-    input  logic        s2_axi_awready,
+    output wire [31:0] s2_axi_awaddr,
+    output wire        s2_axi_awvalid,
+    input  wire        s2_axi_awready,
 
-    output logic [31:0] s2_axi_wdata,
-    output logic [3:0]  s2_axi_wstrb,
-    output logic        s2_axi_wvalid,
-    input  logic        s2_axi_wready,
+    output wire [31:0] s2_axi_wdata,
+    output wire [3:0]  s2_axi_wstrb,
+    output wire        s2_axi_wvalid,
+    input  wire        s2_axi_wready,
 
-    input  logic [1:0]  s2_axi_bresp,
-    input  logic        s2_axi_bvalid,
-    output logic        s2_axi_bready,
+    input  wire [1:0]  s2_axi_bresp,
+    input  wire        s2_axi_bvalid,
+    output wire        s2_axi_bready,
 
-    output logic [31:0] s2_axi_araddr,
-    output logic        s2_axi_arvalid,
-    input  logic        s2_axi_arready,
+    output wire [31:0] s2_axi_araddr,
+    output wire        s2_axi_arvalid,
+    input  wire        s2_axi_arready,
 
-    input  logic [31:0] s2_axi_rdata,
-    input  logic [1:0]  s2_axi_rresp,
-    input  logic        s2_axi_rvalid,
-    output logic        s2_axi_rready,
+    input  wire [31:0] s2_axi_rdata,
+    input  wire [1:0]  s2_axi_rresp,
+    input  wire        s2_axi_rvalid,
+    output wire        s2_axi_rready,
 
     // =====================================================
     // Slave 3: Timer (0x8000_0100)
     // =====================================================
-    output logic [31:0] s3_axi_awaddr,
-    output logic        s3_axi_awvalid,
-    input  logic        s3_axi_awready,
+    output wire [31:0] s3_axi_awaddr,
+    output wire        s3_axi_awvalid,
+    input  wire        s3_axi_awready,
 
-    output logic [31:0] s3_axi_wdata,
-    output logic [3:0]  s3_axi_wstrb,
-    output logic        s3_axi_wvalid,
-    input  logic        s3_axi_wready,
+    output wire [31:0] s3_axi_wdata,
+    output wire [3:0]  s3_axi_wstrb,
+    output wire        s3_axi_wvalid,
+    input  wire        s3_axi_wready,
 
-    input  logic [1:0]  s3_axi_bresp,
-    input  logic        s3_axi_bvalid,
-    output logic        s3_axi_bready,
+    input  wire [1:0]  s3_axi_bresp,
+    input  wire        s3_axi_bvalid,
+    output wire        s3_axi_bready,
 
-    output logic [31:0] s3_axi_araddr,
-    output logic        s3_axi_arvalid,
-    input  logic        s3_axi_arready,
+    output wire [31:0] s3_axi_araddr,
+    output wire        s3_axi_arvalid,
+    input  wire        s3_axi_arready,
 
-    input  logic [31:0] s3_axi_rdata,
-    input  logic [1:0]  s3_axi_rresp,
-    input  logic        s3_axi_rvalid,
-    output logic        s3_axi_rready,
+    input  wire [31:0] s3_axi_rdata,
+    input  wire [1:0]  s3_axi_rresp,
+    input  wire        s3_axi_rvalid,
+    output wire        s3_axi_rready,
 
     // =====================================================
     // Slave 4: UART0 (0x8000_0200)
     // =====================================================
-    output logic [31:0] s4_axi_awaddr,
-    output logic        s4_axi_awvalid,
-    input  logic        s4_axi_awready,
+    output wire [31:0] s4_axi_awaddr,
+    output wire        s4_axi_awvalid,
+    input  wire        s4_axi_awready,
 
-    output logic [31:0] s4_axi_wdata,
-    output logic [3:0]  s4_axi_wstrb,
-    output logic        s4_axi_wvalid,
-    input  logic        s4_axi_wready,
+    output wire [31:0] s4_axi_wdata,
+    output wire [3:0]  s4_axi_wstrb,
+    output wire        s4_axi_wvalid,
+    input  wire        s4_axi_wready,
 
-    input  logic [1:0]  s4_axi_bresp,
-    input  logic        s4_axi_bvalid,
-    output logic        s4_axi_bready,
+    input  wire [1:0]  s4_axi_bresp,
+    input  wire        s4_axi_bvalid,
+    output wire        s4_axi_bready,
 
-    output logic [31:0] s4_axi_araddr,
-    output logic        s4_axi_arvalid,
-    input  logic        s4_axi_arready,
+    output wire [31:0] s4_axi_araddr,
+    output wire        s4_axi_arvalid,
+    input  wire        s4_axi_arready,
 
-    input  logic [31:0] s4_axi_rdata,
-    input  logic [1:0]  s4_axi_rresp,
-    input  logic        s4_axi_rvalid,
-    output logic        s4_axi_rready,
+    input  wire [31:0] s4_axi_rdata,
+    input  wire [1:0]  s4_axi_rresp,
+    input  wire        s4_axi_rvalid,
+    output wire        s4_axi_rready,
 
     // =====================================================
     // Slave 5: UART1 (0x8000_0300)
     // =====================================================
-    output logic [31:0] s5_axi_awaddr,
-    output logic        s5_axi_awvalid,
-    input  logic        s5_axi_awready,
+    output wire [31:0] s5_axi_awaddr,
+    output wire        s5_axi_awvalid,
+    input  wire        s5_axi_awready,
 
-    output logic [31:0] s5_axi_wdata,
-    output logic [3:0]  s5_axi_wstrb,
-    output logic        s5_axi_wvalid,
-    input  logic        s5_axi_wready,
+    output wire [31:0] s5_axi_wdata,
+    output wire [3:0]  s5_axi_wstrb,
+    output wire        s5_axi_wvalid,
+    input  wire        s5_axi_wready,
 
-    input  logic [1:0]  s5_axi_bresp,
-    input  logic        s5_axi_bvalid,
-    output logic        s5_axi_bready,
+    input  wire [1:0]  s5_axi_bresp,
+    input  wire        s5_axi_bvalid,
+    output wire        s5_axi_bready,
 
-    output logic [31:0] s5_axi_araddr,
-    output logic        s5_axi_arvalid,
-    input  logic        s5_axi_arready,
+    output wire [31:0] s5_axi_araddr,
+    output wire        s5_axi_arvalid,
+    input  wire        s5_axi_arready,
 
-    input  logic [31:0] s5_axi_rdata,
-    input  logic [1:0]  s5_axi_rresp,
-    input  logic        s5_axi_rvalid,
-    output logic        s5_axi_rready,
+    input  wire [31:0] s5_axi_rdata,
+    input  wire [1:0]  s5_axi_rresp,
+    input  wire        s5_axi_rvalid,
+    output wire        s5_axi_rready,
 
     // =====================================================
     // Slave 6: I2C (0x8000_0400)
     // =====================================================
-    output logic [31:0] s6_axi_awaddr,
-    output logic        s6_axi_awvalid,
-    input  logic        s6_axi_awready,
+    output wire [31:0] s6_axi_awaddr,
+    output wire        s6_axi_awvalid,
+    input  wire        s6_axi_awready,
 
-    output logic [31:0] s6_axi_wdata,
-    output logic [3:0]  s6_axi_wstrb,
-    output logic        s6_axi_wvalid,
-    input  logic        s6_axi_wready,
+    output wire [31:0] s6_axi_wdata,
+    output wire [3:0]  s6_axi_wstrb,
+    output wire        s6_axi_wvalid,
+    input  wire        s6_axi_wready,
 
-    input  logic [1:0]  s6_axi_bresp,
-    input  logic        s6_axi_bvalid,
-    output logic        s6_axi_bready,
+    input  wire [1:0]  s6_axi_bresp,
+    input  wire        s6_axi_bvalid,
+    output wire        s6_axi_bready,
 
-    output logic [31:0] s6_axi_araddr,
-    output logic        s6_axi_arvalid,
-    input  logic        s6_axi_arready,
+    output wire [31:0] s6_axi_araddr,
+    output wire        s6_axi_arvalid,
+    input  wire        s6_axi_arready,
 
-    input  logic [31:0] s6_axi_rdata,
-    input  logic [1:0]  s6_axi_rresp,
-    input  logic        s6_axi_rvalid,
-    output logic        s6_axi_rready,
+    input  wire [31:0] s6_axi_rdata,
+    input  wire [1:0]  s6_axi_rresp,
+    input  wire        s6_axi_rvalid,
+    output wire        s6_axi_rready,
 
     // =====================================================
     // Slave 7: QSPI (0x8000_0500)
     // =====================================================
-    output logic [31:0] s7_axi_awaddr,
-    output logic        s7_axi_awvalid,
-    input  logic        s7_axi_awready,
+    output wire [31:0] s7_axi_awaddr,
+    output wire        s7_axi_awvalid,
+    input  wire        s7_axi_awready,
 
-    output logic [31:0] s7_axi_wdata,
-    output logic [3:0]  s7_axi_wstrb,
-    output logic        s7_axi_wvalid,
-    input  logic        s7_axi_wready,
+    output wire [31:0] s7_axi_wdata,
+    output wire [3:0]  s7_axi_wstrb,
+    output wire        s7_axi_wvalid,
+    input  wire        s7_axi_wready,
 
-    input  logic [1:0]  s7_axi_bresp,
-    input  logic        s7_axi_bvalid,
-    output logic        s7_axi_bready,
+    input  wire [1:0]  s7_axi_bresp,
+    input  wire        s7_axi_bvalid,
+    output wire        s7_axi_bready,
 
-    output logic [31:0] s7_axi_araddr,
-    output logic        s7_axi_arvalid,
-    input  logic        s7_axi_arready,
+    output wire [31:0] s7_axi_araddr,
+    output wire        s7_axi_arvalid,
+    input  wire        s7_axi_arready,
 
-    input  logic [31:0] s7_axi_rdata,
-    input  logic [1:0]  s7_axi_rresp,
-    input  logic        s7_axi_rvalid,
-    output logic        s7_axi_rready,
+    input  wire [31:0] s7_axi_rdata,
+    input  wire [1:0]  s7_axi_rresp,
+    input  wire        s7_axi_rvalid,
+    output wire        s7_axi_rready,
 
     // =====================================================
     // Slave 8: CNN Accelerator (0x8000_1000)
     // =====================================================
-    output logic [31:0] s8_axi_awaddr,
-    output logic        s8_axi_awvalid,
-    input  logic        s8_axi_awready,
+    output wire [31:0] s8_axi_awaddr,
+    output wire        s8_axi_awvalid,
+    input  wire        s8_axi_awready,
 
-    output logic [31:0] s8_axi_wdata,
-    output logic [3:0]  s8_axi_wstrb,
-    output logic        s8_axi_wvalid,
-    input  logic        s8_axi_wready,
+    output wire [31:0] s8_axi_wdata,
+    output wire [3:0]  s8_axi_wstrb,
+    output wire        s8_axi_wvalid,
+    input  wire        s8_axi_wready,
 
-    input  logic [1:0]  s8_axi_bresp,
-    input  logic        s8_axi_bvalid,
-    output logic        s8_axi_bready,
+    input  wire [1:0]  s8_axi_bresp,
+    input  wire        s8_axi_bvalid,
+    output wire        s8_axi_bready,
 
-    output logic [31:0] s8_axi_araddr,
-    output logic        s8_axi_arvalid,
-    input  logic        s8_axi_arready,
+    output wire [31:0] s8_axi_araddr,
+    output wire        s8_axi_arvalid,
+    input  wire        s8_axi_arready,
 
-    input  logic [31:0] s8_axi_rdata,
-    input  logic [1:0]  s8_axi_rresp,
-    input  logic        s8_axi_rvalid,
-    output logic        s8_axi_rready
+    input  wire [31:0] s8_axi_rdata,
+    input  wire [1:0]  s8_axi_rresp,
+    input  wire        s8_axi_rvalid,
+    output wire        s8_axi_rready
 );
 
     // =====================================================

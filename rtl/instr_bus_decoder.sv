@@ -2,29 +2,29 @@ module instr_bus_decoder (
     // =========================
     // CPU instruction interface
     // =========================
-    input  logic        instr_req_i,
-    output logic        instr_gnt_o,
-    output logic        instr_rvalid_o,
-    input  logic [31:0] instr_addr_i,
-    output logic [31:0] instr_rdata_o,
+    input  wire        instr_req_i,
+    output wire        instr_gnt_o,
+    output wire        instr_rvalid_o,
+    input  wire [31:0] instr_addr_i,
+    output wire [31:0] instr_rdata_o,
 
     // =========================
     // Boot ROM (1 kB)
     // =========================
-    output logic        boot_req_o,
-    input  logic        boot_gnt_i,
-    input  logic        boot_rvalid_i,
-    output logic [31:0] boot_addr_o,
-    input  logic [31:0] boot_rdata_i,
+    output wire        boot_req_o,
+    input  wire        boot_gnt_i,
+    input  wire        boot_rvalid_i,
+    output wire [31:0] boot_addr_o,
+    input  wire [31:0] boot_rdata_i,
 
     // =========================
     // Instruction memory (8 kB)
     // =========================
-    output logic        imem_req_o,
-    input  logic        imem_gnt_i,
-    input  logic        imem_rvalid_i,
-    output logic [31:0] imem_addr_o,
-    input  logic [31:0] imem_rdata_i
+    output wire        imem_req_o,
+    input  wire        imem_gnt_i,
+    input  wire        imem_rvalid_i,
+    output wire [31:0] imem_addr_o,
+    input  wire [31:0] imem_rdata_i
 );
 
     // Address decode

@@ -1,11 +1,11 @@
 module boot_rom_1kB (
-    input logic clk_i,
-    input logic rst_ni,
+    input wire clk_i,
+    input wire rst_ni,
 
-    input logic instr_req_i,
-    output logic instr_gnt_o,
+    input wire instr_req_i,
+    output wire instr_gnt_o,
     output logic instr_rvalid_o,
-    input logic [31:0] instr_addr_i,
+    input wire [31:0] instr_addr_i,
     output logic [31:0] instr_rdata_o
 );
 

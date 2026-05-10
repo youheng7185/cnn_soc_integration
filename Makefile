@@ -66,7 +66,6 @@ RTL_SRC := \
     axi_qspi/axi_qspi_verilator.sv \
     axi_qspi/axi_qspi_controller.sv \
     axi_qspi/qspi_driver.sv \
-    axi_qspi/qspi_master.sv \
     axi_qspi/qspi_flash_model.sv \
     axi_qspi/qspi_controller.sv \
     axi_qspi/clk_divider.sv \

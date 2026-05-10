@@ -1,5 +1,6 @@
 # Ignore Verilator output folder
 obj_dir/
+.Xil/
 
 # Optional: ignore temporary simulation logs or dump files
 *.vcd

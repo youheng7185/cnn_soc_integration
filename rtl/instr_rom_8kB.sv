@@ -10,6 +10,7 @@ module instr_rom_8kB (
 );
 
     // 8kB of data mem
+    (* ram_style = "block" *)
     logic [31:0] instr_mem [0:2047];
     logic [31:0] rdata_q;
 
@@ -35,6 +36,9 @@ module instr_rom_8kB (
         $readmemh("cnn_soc_c_project/build/firmware_clean.hex", instr_mem);
     end
 
+    wire [10:0] word_addr;
+    assign word_addr = instr_addr_i[12:2];
+    
     always_ff @(posedge clk_i or negedge rst_ni) begin
         if (!rst_ni) begin
             instr_rvalid_o <= 1'b0;
@@ -44,7 +48,7 @@ module instr_rom_8kB (
 
             if (instr_req_i) begin
                 //rdata_q <= instr_mem[instr_addr_i[12:2]];
-                rdata_q <= instr_mem[(instr_addr_i - 32'h80000000) >> 2];
+                rdata_q <= instr_mem[word_addr];
                 instr_rvalid_o <= 1'b1;
             end
         end

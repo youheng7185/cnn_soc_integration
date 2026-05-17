@@ -6,17 +6,17 @@ BUILD_DIR      := obj_dir
 SIM            := $(BUILD_DIR)/V$(TOP)
 VERILATOR      := verilator
 CXXFLAGS       := -O2 -std=c++17
+
 VERILATOR_FLAGS := \
     --cc \
     --exe \
-    --trace-fst \
-    --trace-structs \
-    --trace-depth 99 \
     --Wall \
     -Wno-fatal \
     --top-module $(TOP) \
     -Mdir $(BUILD_DIR) \
-    -CFLAGS "$(CXXFLAGS)"
+    -CFLAGS "$(CXXFLAGS)" \
+    --timing \
+    -DCV32E40P_TRACE_EXECUTION
 
 # ------------------------------------------------------------
 # Testbench
@@ -38,10 +38,16 @@ CV32_CORE := $(shell find cv32e40p/rtl -name "*.sv" \
     ! -name "*fp*" \
     ! -name "*fpu*" )
 
+# CV32_BHV := $(shell find cv32e40p/bhv -name "*.sv")
+CV32_BHV := \
+    cv32e40p/bhv/cv32e40p_sim_clock_gate.sv \
+    cv32e40p/bhv/cv32e40p_tracer.sv
+
 RTL_SRC := \
+    rtl/include/uvm_pkg.sv \
     $(CV32_PKG) \
     $(CV32_CORE) \
-    cv32e40p/bhv/cv32e40p_sim_clock_gate.sv \
+    $(CV32_BHV) \
     core2axi/rtl/core2axi.sv \
     axi_cnn/axi_cnn.sv \
     axi_cnn/cnn_controller.sv \
@@ -77,7 +83,11 @@ RTL_SRC := \
 
 # Include paths (SystemVerilog packages)
 INCLUDES := \
-    -Icv32e40p/rtl/include
+    -Icv32e40p/rtl/include \
+    -Icv32e40p/bhv/include \
+    -Icv32e40p/bhv \
+    -Irtl/include
+
 
 # ------------------------------------------------------------
 # Build rules

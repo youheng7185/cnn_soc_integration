@@ -72,7 +72,7 @@ module cv32e40p_verilator_top (
     logic [31:0] imem_addr;
     logic [31:0] imem_rdata;
 
-    cv32e40p_top #(
+    cv32e40p_tb_wrapper #(
         .COREV_PULP(0),
         .COREV_CLUSTER(0),
         .FPU(0),

@@ -1,0 +1,642 @@
+
+build/bootrom.elf:     file format elf32-littleriscv
+
+
+Disassembly of section .text:
+
+00000000 <_start>:
+_start:
+
+# -----------------------------------------------------------
+# UART INIT (DO THIS FIRST)
+# -----------------------------------------------------------
+    li t0, UART_BASE
+   0:	800002b7          	lui	t0,0x80000
+   4:	20028293          	addi	t0,t0,512 # 80000200 <UART_BASE>
+
+    li t1, 217
+   8:	0d900313          	li	t1,217
+    sw t1, UART_PRE(t0)
+   c:	0062a023          	sw	t1,0(t0)
+
+    li t1, 0
+  10:	4301                	li	t1,0
+    sw t1, UART_STP(t0)
+  12:	0062a223          	sw	t1,4(t0)
+
+# -----------------------------------------------------------
+# QSPI SETUP
+# -----------------------------------------------------------
+    li s0, QSPI_BASE
+  16:	80000437          	lui	s0,0x80000
+  1a:	50040413          	addi	s0,s0,1280 # 80000500 <QSPI_BASE>
+    li s1, RAM_BASE
+  1e:	200004b7          	lui	s1,0x20000
+    li s2, 32              # 32 blocks
+  22:	02000913          	li	s2,32
+
+    li s3, 0x00000000      # flash addr
+  26:	4981                	li	s3,0
+    li s4, 0x00000100      # 256 bytes step
+  28:	10000a13          	li	s4,256
+
+0000002c <qspi_block_loop>:
+qspi_block_loop:
+
+# -----------------------------------------------------------
+# set flash address (ONLY ONCE PER LOOP)
+# -----------------------------------------------------------
+    sw s3, QSPI_ADR(s0)
+  2c:	01342223          	sw	s3,4(s0)
+    fence
+  30:	0ff0000f          	fence
+    add s3, s3, s4
+  34:	99d2                	add	s3,s3,s4
+
+# -----------------------------------------------------------
+# flush FIFO
+# -----------------------------------------------------------
+    li t0, (1 << 0) | (1 << 1)
+  36:	428d                	li	t0,3
+    sw t0, QSPI_FCR(s0)
+  38:	00542823          	sw	t0,16(s0)
+
+# -----------------------------------------------------------
+# configure QSPI read (256 bytes)
+# -----------------------------------------------------------
+
+    li t1, 0x6C
+  3c:	06c00313          	li	t1,108
+
+    li t2, (3 << 8)
+  40:	30000393          	li	t2,768
+    or  t1, t1, t2
+  44:	00736333          	or	t1,t1,t2
+
+    li t2, (0 << 10)
+  48:	4381                	li	t2,0
+    or  t1, t1, t2
+  4a:	00736333          	or	t1,t1,t2
+
+    li t2, (8 << 11)
+  4e:	6391                	lui	t2,0x4
+    or  t1, t1, t2
+  50:	00736333          	or	t1,t1,t2
+
+    li t2, (255 << 16)
+  54:	00ff03b7          	lui	t2,0xff0
+    or  t1, t1, t2
+  58:	00736333          	or	t1,t1,t2
+
+    li t2, (1 << 25)
+  5c:	020003b7          	lui	t2,0x2000
+    or  t1, t1, t2
+  60:	00736333          	or	t1,t1,t2
+
+    sw t1, QSPI_CCR(s0)
+  64:	00642023          	sw	t1,0(s0)
+
+# -----------------------------------------------------------
+# start transfer
+# -----------------------------------------------------------
+    li t0, 0xABCD
+  68:	62ad                	lui	t0,0xb
+  6a:	bcd28293          	addi	t0,t0,-1075 # abcd <_stack_top+0xa9ed>
+    sw t0, QSPI_DR(s0)
+  6e:	00542423          	sw	t0,8(s0)
+
+00000072 <wait_done>:
+
+# -----------------------------------------------------------
+# wait done
+# -----------------------------------------------------------
+wait_done:
+    lw t0, QSPI_STA(s0)
+  72:	00c42283          	lw	t0,12(s0)
+    andi t0, t0, 1
+  76:	0012f293          	andi	t0,t0,1
+    beqz t0, wait_done
+  7a:	fe028ce3          	beqz	t0,72 <wait_done>
+
+# -----------------------------------------------------------
+# read 256 bytes -> RAM
+# -----------------------------------------------------------
+    li t3, 64
+  7e:	04000e13          	li	t3,64
+
+00000082 <read_loop>:
+
+read_loop:
+    lw t0, QSPI_DR(s0)
+  82:	00842283          	lw	t0,8(s0)
+    sw t0, 0(s1)
+  86:	0054a023          	sw	t0,0(s1) # 20000000 <RAM_BASE>
+
+    addi s1, s1, 4
+  8a:	0491                	addi	s1,s1,4
+    addi t3, t3, -1
+  8c:	1e7d                	addi	t3,t3,-1
+    bnez t3, read_loop
+  8e:	fe0e1ae3          	bnez	t3,82 <read_loop>
+
+# -----------------------------------------------------------
+# next block
+# -----------------------------------------------------------
+    addi s2, s2, -1
+  92:	197d                	addi	s2,s2,-1
+    bnez s2, qspi_block_loop
+  94:	f8091ce3          	bnez	s2,2c <qspi_block_loop>
+
+# ===========================================================
+# SUCCESS MESSAGE
+# ===========================================================
+    li t2, 0x4F
+  98:	04f00393          	li	t2,79
+    jal ra, uart_send
+  9c:	018000ef          	jal	b4 <uart_send>
+
+    li t2, 0x4B
+  a0:	04b00393          	li	t2,75
+    jal ra, uart_send
+  a4:	010000ef          	jal	b4 <uart_send>
+
+    li t2, 0x0A
+  a8:	43a9                	li	t2,10
+    jal ra, uart_send
+  aa:	00a000ef          	jal	b4 <uart_send>
+
+# ===========================================================
+# JUMP TO LOADED IMAGE
+# ===========================================================
+    li t0, 0x80000000
+  ae:	800002b7          	lui	t0,0x80000
+    jr t0
+  b2:	8282                	jr	t0
+
+000000b4 <uart_send>:
+
+# ===========================================================
+# UART SEND
+# ===========================================================
+uart_send:
+    li t0, UART_BASE
+  b4:	800002b7          	lui	t0,0x80000
+  b8:	20028293          	addi	t0,t0,512 # 80000200 <UART_BASE>
+
+    sw t2, UART_TDR(t0)
+  bc:	0072a623          	sw	t2,12(t0)
+
+    li t1, 1
+  c0:	4305                	li	t1,1
+    sw t1, UART_CFG(t0)
+  c2:	0062a823          	sw	t1,16(t0)
+
+    li t1, 0
+  c6:	4301                	li	t1,0
+    sw t1, UART_CFG(t0)
+  c8:	0062a823          	sw	t1,16(t0)
+
+000000cc <wait_tx>:
+
+wait_tx:
+    lw t1, UART_CFG(t0)
+  cc:	0102a303          	lw	t1,16(t0)
+    andi t1, t1, 4
+  d0:	00437313          	andi	t1,t1,4
+    beqz t1, wait_tx
+  d4:	fe030ce3          	beqz	t1,cc <wait_tx>
+
+    ret
+  d8:	8082                	ret
+
+Disassembly of section .stack:
+
+000000e0 <_stack_top-0x100>:
+	...
+
+000001e0 <_stack_top>:
+	...
+
+Disassembly of section .riscv.attributes:
+
+00000000 <.riscv.attributes>:
+    li t0, UART_BASE
+   0:	4041                	c.li	zero,16
+   2:	0000                	unimp
+   4:	7200                	.insn	2, 0x7200
+   6:	7369                	lui	t1,0xffffa
+    li t1, 217
+   8:	01007663          	bgeu	zero,a6,14 <QSPI_FCR+0x4>
+    sw t1, UART_PRE(t0)
+   c:	0036                	c.slli	zero,0xd
+   e:	0000                	unimp
+    li t1, 0
+  10:	7205                	lui	tp,0xfffe1
+    sw t1, UART_STP(t0)
+  12:	3376                	.insn	2, 0x3376
+  14:	6932                	.insn	2, 0x6932
+    li s0, QSPI_BASE
+  16:	7032                	.insn	2, 0x7032
+  18:	5f31                	li	t5,-20
+  1a:	326d                	jal	fffff9c4 <QSPI_BASE+0x7ffff4c4>
+  1c:	3070                	.insn	2, 0x3070
+    li s1, RAM_BASE
+  1e:	635f 7032 5f30      	.insn	6, 0x5f307032635f
+    li s2, 32              # 32 blocks
+  24:	697a                	.insn	2, 0x697a
+    li s3, 0x00000000      # flash addr
+  26:	32727363          	bgeu	tp,t2,34c <_stack_top+0x16c>
+    li s4, 0x00000100      # 256 bytes step
+  2a:	3070                	.insn	2, 0x3070
+    sw s3, QSPI_ADR(s0)
+  2c:	7a5f 6d6d 6c75      	.insn	6, 0x6c756d6d7a5f
+    fence
+  32:	7031                	c.lui	zero,0xfffec
+    add s3, s3, s4
+  34:	5f30                	lw	a2,120(a4)
+    li t0, (1 << 0) | (1 << 1)
+  36:	637a                	.insn	2, 0x637a
+    sw t0, QSPI_FCR(s0)
+  38:	3161                	jal	fffffcc0 <QSPI_BASE+0x7ffff7c0>
+  3a:	3070                	.insn	2, 0x3070
+    li t1, 0x6C
+  3c:	0800                	addi	s0,sp,16
+  3e:	0a01                	addi	s4,s4,0
+    li t2, (3 << 8)
+  40:	0b                	.byte	0x0b
+
+Disassembly of section .debug_line:
+
+00000000 <.debug_line>:
+    li t0, UART_BASE
+   0:	0198                	addi	a4,sp,192
+   2:	0000                	unimp
+   4:	0005                	c.nop	1
+   6:	0004                	.insn	2, 0x0004
+    li t1, 217
+   8:	002a                	c.slli	zero,0xa
+   a:	0000                	unimp
+    sw t1, UART_PRE(t0)
+   c:	0101                	addi	sp,sp,0
+   e:	fb01                	bnez	a4,ffffff1e <QSPI_BASE+0x7ffffa1e>
+    li t1, 0
+  10:	0d0e                	slli	s10,s10,0x3
+    sw t1, UART_STP(t0)
+  12:	0100                	addi	s0,sp,128
+  14:	0101                	addi	sp,sp,0
+    li s0, QSPI_BASE
+  16:	0001                	nop
+  18:	0000                	unimp
+  1a:	0001                	nop
+  1c:	0100                	addi	s0,sp,128
+    li s1, RAM_BASE
+  1e:	0101                	addi	sp,sp,0
+  20:	011f 0000 0000      	.insn	6, 0x011f
+    li s3, 0x00000000      # flash addr
+  26:	0102                	c.slli64	sp
+    li s4, 0x00000100      # 256 bytes step
+  28:	021f 020f 004d      	.insn	6, 0x004d020f021f
+    sw s3, QSPI_ADR(s0)
+  2e:	0000                	unimp
+    fence
+  30:	4d00                	lw	s0,24(a0)
+  32:	0000                	unimp
+    add s3, s3, s4
+  34:	0000                	unimp
+    li t0, (1 << 0) | (1 << 1)
+  36:	0500                	addi	s0,sp,640
+    sw t0, QSPI_FCR(s0)
+  38:	0002                	c.slli64	zero
+  3a:	0000                	unimp
+    li t1, 0x6C
+  3c:	0300                	addi	s0,sp,384
+  3e:	0125                	addi	sp,sp,9
+    li t2, (3 << 8)
+  40:	08090203          	lb	tp,128(s2)
+    or  t1, t1, t2
+  44:	0100                	addi	s0,sp,128
+  46:	04090103          	lb	sp,64(s2)
+    or  t1, t1, t2
+  4a:	0100                	addi	s0,sp,128
+  4c:	04090203          	lb	tp,64(s2)
+    or  t1, t1, t2
+  50:	0100                	addi	s0,sp,128
+  52:	02090103          	lb	sp,32(s2)
+    li t2, (255 << 16)
+  56:	0100                	addi	s0,sp,128
+    or  t1, t1, t2
+  58:	04090503          	lb	a0,64(s2)
+    li t2, (1 << 25)
+  5c:	0100                	addi	s0,sp,128
+  5e:	08090103          	lb	sp,128(s2)
+    or  t1, t1, t2
+  62:	0100                	addi	s0,sp,128
+    sw t1, QSPI_CCR(s0)
+  64:	04090103          	lb	sp,64(s2)
+    li t0, 0xABCD
+  68:	0100                	addi	s0,sp,128
+  6a:	04090203          	lb	tp,64(s2)
+    sw t0, QSPI_DR(s0)
+  6e:	0100                	addi	s0,sp,128
+  70:	02090103          	lb	sp,32(s2)
+    lw t0, QSPI_STA(s0)
+  74:	0100                	addi	s0,sp,128
+    andi t0, t0, 1
+  76:	04090a03          	lb	s4,64(s2)
+    beqz t0, wait_done
+  7a:	0100                	addi	s0,sp,128
+  7c:	04090103          	lb	sp,64(s2)
+    li t3, 64
+  80:	0100                	addi	s0,sp,128
+    lw t0, QSPI_DR(s0)
+  82:	04090103          	lb	sp,64(s2)
+    sw t0, 0(s1)
+  86:	0100                	addi	s0,sp,128
+  88:	02090503          	lb	a0,32(s2)
+    addi t3, t3, -1
+  8c:	0100                	addi	s0,sp,128
+    bnez t3, read_loop
+  8e:	02090103          	lb	sp,32(s2)
+    addi s2, s2, -1
+  92:	0100                	addi	s0,sp,128
+    bnez s2, qspi_block_loop
+  94:	04090603          	lb	a2,64(s2)
+    li t2, 0x4F
+  98:	0100                	addi	s0,sp,128
+  9a:	04090203          	lb	tp,64(s2)
+    jal ra, uart_send
+  9e:	0100                	addi	s0,sp,128
+    li t2, 0x4B
+  a0:	04090103          	lb	sp,64(s2)
+    jal ra, uart_send
+  a4:	0100                	addi	s0,sp,128
+  a6:	04090203          	lb	tp,64(s2)
+    jal ra, uart_send
+  aa:	0100                	addi	s0,sp,128
+  ac:	02090103          	lb	sp,32(s2)
+    li t0, 0x80000000
+  b0:	0100                	addi	s0,sp,128
+    jr t0
+  b2:	04090203          	lb	tp,64(s2)
+    li t0, UART_BASE
+  b6:	0100                	addi	s0,sp,128
+  b8:	02090103          	lb	sp,32(s2)
+    sw t2, UART_TDR(t0)
+  bc:	0100                	addi	s0,sp,128
+  be:	04090203          	lb	tp,64(s2)
+    sw t1, UART_CFG(t0)
+  c2:	0100                	addi	s0,sp,128
+  c4:	04090103          	lb	sp,64(s2)
+    sw t1, UART_CFG(t0)
+  c8:	0100                	addi	s0,sp,128
+  ca:	04090203          	lb	tp,64(s2)
+    lw t1, UART_CFG(t0)
+  ce:	0100                	addi	s0,sp,128
+    andi t1, t1, 4
+  d0:	04090103          	lb	sp,64(s2)
+    beqz t1, wait_tx
+  d4:	0100                	addi	s0,sp,128
+  d6:	04090203          	lb	tp,64(s2)
+  da:	0100                	addi	s0,sp,128
+  dc:	04090503          	lb	a0,64(s2)
+  e0:	0100                	addi	s0,sp,128
+  e2:	06090103          	lb	sp,96(s2)
+  e6:	0100                	addi	s0,sp,128
+  e8:	04090603          	lb	a2,64(s2)
+  ec:	0100                	addi	s0,sp,128
+  ee:	04090103          	lb	sp,64(s2)
+  f2:	0100                	addi	s0,sp,128
+  f4:	04090103          	lb	sp,64(s2)
+  f8:	0100                	addi	s0,sp,128
+  fa:	04090503          	lb	a0,64(s2)
+  fe:	0100                	addi	s0,sp,128
+ 100:	04090303          	lb	t1,64(s2)
+ 104:	0100                	addi	s0,sp,128
+ 106:	04090103          	lb	sp,64(s2)
+ 10a:	0100                	addi	s0,sp,128
+ 10c:	04090203          	lb	tp,64(s2)
+ 110:	0100                	addi	s0,sp,128
+ 112:	02090103          	lb	sp,32(s2)
+ 116:	0100                	addi	s0,sp,128
+ 118:	02090103          	lb	sp,32(s2)
+ 11c:	0100                	addi	s0,sp,128
+ 11e:	04090503          	lb	a0,64(s2)
+ 122:	0100                	addi	s0,sp,128
+ 124:	02090103          	lb	sp,32(s2)
+ 128:	0100                	addi	s0,sp,128
+ 12a:	04090503          	lb	a0,64(s2)
+ 12e:	0100                	addi	s0,sp,128
+ 130:	04090103          	lb	sp,64(s2)
+ 134:	0100                	addi	s0,sp,128
+ 136:	04090203          	lb	tp,64(s2)
+ 13a:	0100                	addi	s0,sp,128
+ 13c:	04090103          	lb	sp,64(s2)
+ 140:	0100                	addi	s0,sp,128
+ 142:	04090203          	lb	tp,64(s2)
+ 146:	0100                	addi	s0,sp,128
+ 148:	02090103          	lb	sp,32(s2)
+ 14c:	0100                	addi	s0,sp,128
+ 14e:	04090503          	lb	a0,64(s2)
+ 152:	0100                	addi	s0,sp,128
+ 154:	04090103          	lb	sp,64(s2)
+ 158:	0100                	addi	s0,sp,128
+ 15a:	02090603          	lb	a2,32(s2)
+ 15e:	0100                	addi	s0,sp,128
+ 160:	08090203          	lb	tp,128(s2)
+ 164:	0100                	addi	s0,sp,128
+ 166:	04090203          	lb	tp,64(s2)
+ 16a:	0100                	addi	s0,sp,128
+ 16c:	02090103          	lb	sp,32(s2)
+ 170:	0100                	addi	s0,sp,128
+ 172:	04090203          	lb	tp,64(s2)
+ 176:	0100                	addi	s0,sp,128
+ 178:	02090103          	lb	sp,32(s2)
+ 17c:	0100                	addi	s0,sp,128
+ 17e:	04090303          	lb	t1,64(s2)
+ 182:	0100                	addi	s0,sp,128
+ 184:	04090103          	lb	sp,64(s2)
+ 188:	0100                	addi	s0,sp,128
+ 18a:	04090103          	lb	sp,64(s2)
+ 18e:	0100                	addi	s0,sp,128
+ 190:	04090203          	lb	tp,64(s2)
+ 194:	0100                	addi	s0,sp,128
+ 196:	0209                	addi	tp,tp,2 # fffe1002 <QSPI_BASE+0x7ffe0b02>
+ 198:	0000                	unimp
+ 19a:	0101                	addi	sp,sp,0
+
+Disassembly of section .debug_line_str:
+
+00000000 <.debug_line_str>:
+    li t0, UART_BASE
+   0:	6d6f682f          	.insn	4, 0x6d6f682f
+   4:	2f65                	jal	7bc <_stack_top+0x5dc>
+   6:	616c                	.insn	2, 0x616c
+    li t1, 217
+   8:	6370                	.insn	2, 0x6370
+   a:	6f68                	.insn	2, 0x6f68
+    sw t1, UART_PRE(t0)
+   c:	676e                	.insn	2, 0x676e
+   e:	6770662f          	.insn	4, 0x6770662f
+    sw t1, UART_STP(t0)
+  12:	2f61                	jal	7aa <_stack_top+0x5ca>
+  14:	5f6e6e63          	bltu	t3,s6,610 <_stack_top+0x430>
+    li s0, QSPI_BASE
+  18:	2f636f73          	csrrsi	t5,0x2f6,6
+  1c:	3032                	.insn	2, 0x3032
+    li s1, RAM_BASE
+  1e:	3632                	.insn	2, 0x3632
+  20:	725f 3176 3834      	.insn	6, 0x38343176725f
+    li s3, 0x00000000      # flash addr
+  26:	5f30                	lw	a2,120(a4)
+    li s4, 0x00000100      # 256 bytes step
+  28:	5f6e6e63          	bltu	t3,s6,624 <_stack_top+0x444>
+    sw s3, QSPI_ADR(s0)
+  2c:	5f636f73          	csrrsi	t5,0x5f6,6
+    fence
+  30:	6e69                	lui	t3,0x1a
+  32:	6574                	.insn	2, 0x6574
+    add s3, s3, s4
+  34:	74617267          	.insn	4, 0x74617267
+    sw t0, QSPI_FCR(s0)
+  38:	6f69                	lui	t5,0x1a
+  3a:	2f6e                	.insn	2, 0x2f6e
+    li t1, 0x6C
+  3c:	6f62                	.insn	2, 0x6f62
+  3e:	725f746f          	jal	s0,f7f62 <_stack_top+0xf7d82>
+    li t2, (3 << 8)
+  42:	705f6d6f          	jal	s10,f6f46 <_stack_top+0xf6d66>
+    or  t1, t1, t2
+  46:	6f72                	.insn	2, 0x6f72
+    li t2, (0 << 10)
+  48:	656a                	.insn	2, 0x656a
+    or  t1, t1, t2
+  4a:	63007463          	bgeu	zero,a6,672 <_stack_top+0x492>
+    li t2, (8 << 11)
+  4e:	7472                	.insn	2, 0x7472
+    or  t1, t1, t2
+  50:	2e30                	.insn	2, 0x2e30
+  52:	0053                	.short	0x0053
+
+Disassembly of section .debug_info:
+
+00000000 <.debug_info>:
+    li t0, UART_BASE
+   0:	0021                	c.nop	8
+   2:	0000                	unimp
+   4:	0005                	c.nop	1
+   6:	0401                	addi	s0,s0,0
+    li t1, 217
+   8:	0000                	unimp
+   a:	0000                	unimp
+    sw t1, UART_PRE(t0)
+   c:	0001                	nop
+   e:	0000                	unimp
+    li t1, 0
+  10:	0000                	unimp
+    sw t1, UART_STP(t0)
+  12:	0000                	unimp
+  14:	da00                	sw	s0,48(a2)
+    li s0, QSPI_BASE
+  16:	0001                	nop
+  18:	0000                	unimp
+  1a:	0700                	addi	s0,sp,896
+  1c:	0000                	unimp
+    li s1, RAM_BASE
+  1e:	5400                	lw	s0,40(s0)
+  20:	0000                	unimp
+    li s2, 32              # 32 blocks
+  22:	0100                	addi	s0,sp,128
+  24:	80                	.byte	0x80
+
+Disassembly of section .debug_abbrev:
+
+00000000 <.debug_abbrev>:
+    li t0, UART_BASE
+   0:	1101                	addi	sp,sp,-32
+   2:	1000                	addi	s0,sp,32
+   4:	12011117          	auipc	sp,0x12011
+    li t1, 217
+   8:	1b0e030f          	.insn	4, 0x1b0e030f
+    sw t1, UART_PRE(t0)
+   c:	250e                	.insn	2, 0x250e
+   e:	130e                	slli	t1,t1,0x23
+    li t1, 0
+  10:	0005                	c.nop	1
+	...
+
+Disassembly of section .debug_aranges:
+
+00000000 <.debug_aranges>:
+    li t0, UART_BASE
+   0:	001c                	.insn	2, 0x001c
+   2:	0000                	unimp
+   4:	0002                	c.slli64	zero
+   6:	0000                	unimp
+    li t1, 217
+   8:	0000                	unimp
+   a:	0004                	.insn	2, 0x0004
+	...
+    sw t1, UART_STP(t0)
+  14:	00da                	slli	ra,ra,0x16
+	...
+
+Disassembly of section .debug_str:
+
+00000000 <.debug_str>:
+    li t0, UART_BASE
+   0:	30747263          	bgeu	s0,t2,304 <_stack_top+0x124>
+   4:	532e                	lw	t1,232(sp)
+   6:	2f00                	.insn	2, 0x2f00
+    li t1, 217
+   8:	6f68                	.insn	2, 0x6f68
+   a:	656d                	lui	a0,0x1b
+    sw t1, UART_PRE(t0)
+   c:	70616c2f          	.insn	4, 0x70616c2f
+    li t1, 0
+  10:	6e6f6863          	bltu	t5,t1,700 <_stack_top+0x520>
+    sw t1, UART_STP(t0)
+  14:	70662f67          	.insn	4, 0x70662f67
+    li s0, QSPI_BASE
+  18:	632f6167          	.insn	4, 0x632f6167
+  1c:	6e6e                	.insn	2, 0x6e6e
+    li s1, RAM_BASE
+  1e:	735f 636f 322f      	.insn	6, 0x322f636f735f
+    li s2, 32              # 32 blocks
+  24:	3230                	.insn	2, 0x3230
+    li s3, 0x00000000      # flash addr
+  26:	5f36                	lw	t5,108(sp)
+    li s4, 0x00000100      # 256 bytes step
+  28:	7672                	.insn	2, 0x7672
+  2a:	3431                	jal	fffffa36 <QSPI_BASE+0x7ffff536>
+    sw s3, QSPI_ADR(s0)
+  2c:	3038                	.insn	2, 0x3038
+  2e:	635f 6e6e 735f      	.insn	6, 0x735f6e6e635f
+    add s3, s3, s4
+  34:	695f636f          	jal	t1,f6ec8 <_stack_top+0xf6ce8>
+    sw t0, QSPI_FCR(s0)
+  38:	746e                	.insn	2, 0x746e
+  3a:	6765                	lui	a4,0x19
+    li t1, 0x6C
+  3c:	6172                	.insn	2, 0x6172
+  3e:	6974                	.insn	2, 0x6974
+    li t2, (3 << 8)
+  40:	622f6e6f          	jal	t3,f6662 <_stack_top+0xf6482>
+    or  t1, t1, t2
+  44:	5f746f6f          	jal	t5,46e3a <_stack_top+0x46c5a>
+    li t2, (0 << 10)
+  48:	6f72                	.insn	2, 0x6f72
+    or  t1, t1, t2
+  4a:	5f6d                	li	t5,-5
+  4c:	7270                	.insn	2, 0x7270
+    li t2, (8 << 11)
+  4e:	63656a6f          	jal	s4,56684 <_stack_top+0x564a4>
+    or  t1, t1, t2
+  52:	0074                	addi	a3,sp,12
+    li t2, (255 << 16)
+  54:	20554e47          	.insn	4, 0x20554e47
+    or  t1, t1, t2
+  58:	5341                	li	t1,-16
+  5a:	3220                	.insn	2, 0x3220
+    li t2, (1 << 25)
+  5c:	342e                	.insn	2, 0x342e
+  5e:	0035                	c.nop	13

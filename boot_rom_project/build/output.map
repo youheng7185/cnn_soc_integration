@@ -1,0 +1,74 @@
+
+Discarded input sections
+
+ .text          0x00000000        0x0 /tmp/cczphgTg.o
+ .data          0x00000000        0x0 /tmp/cczphgTg.o
+ .bss           0x00000000        0x0 /tmp/cczphgTg.o
+ .text          0x00000000        0x0 /tmp/ccSKGqd0.o
+ .data          0x00000000        0x0 /tmp/ccSKGqd0.o
+ .bss           0x00000000        0x0 /tmp/ccSKGqd0.o
+ .vectors       0x00000000      0x100 /tmp/ccSKGqd0.o
+ .text.vecs     0x00000000       0x8c /tmp/ccSKGqd0.o
+ .rodata        0x00000000       0xb5 /tmp/ccSKGqd0.o
+ .debug_line    0x00000000      0x27f /tmp/ccSKGqd0.o
+ .debug_line_str
+                0x00000000       0x57 /tmp/ccSKGqd0.o
+ .debug_info    0x00000000       0x23 /tmp/ccSKGqd0.o
+ .debug_abbrev  0x00000000       0x12 /tmp/ccSKGqd0.o
+ .debug_aranges
+                0x00000000       0x28 /tmp/ccSKGqd0.o
+ .debug_str     0x00000000       0x63 /tmp/ccSKGqd0.o
+ .debug_rnglists
+                0x00000000       0x1b /tmp/ccSKGqd0.o
+ .riscv.attributes
+                0x00000000       0x41 /tmp/ccSKGqd0.o
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+imem             0x00000000         0x00000400         xr
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+LOAD /tmp/cczphgTg.o
+LOAD /tmp/ccSKGqd0.o
+
+.text           0x00000000       0xda
+ *(.init)
+ .init          0x00000000       0xda /tmp/cczphgTg.o
+                0x00000000                _start
+ *(.text*)
+
+.stack          0x000000e0      0x200
+                0x000001e0                        . = (. + 0x100)
+ *fill*         0x000000e0      0x100 
+                0x000001e0                        _stack_top = .
+ .stack         0x000001e0      0x100 /tmp/cczphgTg.o
+OUTPUT(build/bootrom.elf elf32-littleriscv)
+
+.riscv.attributes
+                0x00000000       0x41
+ .riscv.attributes
+                0x00000000       0x3d /tmp/cczphgTg.o
+
+.debug_line     0x00000000      0x19c
+ .debug_line    0x00000000      0x19c /tmp/cczphgTg.o
+
+.debug_line_str
+                0x00000000       0x54
+ .debug_line_str
+                0x00000000       0x54 /tmp/cczphgTg.o
+
+.debug_info     0x00000000       0x25
+ .debug_info    0x00000000       0x25 /tmp/cczphgTg.o
+
+.debug_abbrev   0x00000000       0x14
+ .debug_abbrev  0x00000000       0x14 /tmp/cczphgTg.o
+
+.debug_aranges  0x00000000       0x20
+ .debug_aranges
+                0x00000000       0x20 /tmp/cczphgTg.o
+
+.debug_str      0x00000000       0x60
+ .debug_str     0x00000000       0x60 /tmp/cczphgTg.o

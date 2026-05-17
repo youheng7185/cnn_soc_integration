@@ -195,16 +195,16 @@ module cv32e40p_verilator_top (
         .instr_rdata_o  (boot_rdata)
     );
 
-    instr_rom_8kB u_imem (
-        .clk_i         (clk_i),
-        .rst_ni        (rst_ni),
+    // instr_rom_8kB u_imem (
+    //     .clk_i         (clk_i),
+    //     .rst_ni        (rst_ni),
 
-        .instr_req_i    (imem_req),
-        .instr_gnt_o    (imem_gnt),
-        .instr_rvalid_o (imem_rvalid),
-        .instr_addr_i   (imem_addr),
-        .instr_rdata_o  (imem_rdata)
-    );
+    //     .instr_req_i    (imem_req),
+    //     .instr_gnt_o    (imem_gnt),
+    //     .instr_rvalid_o (imem_rvalid),
+    //     .instr_addr_i   (imem_addr),
+    //     .instr_rdata_o  (imem_rdata)
+    // );
 
     // =====================================================
     // AXI Peripheral wires - Data Memory (0x1000_0000)
@@ -623,29 +623,45 @@ module cv32e40p_verilator_top (
     // =====================================================
     // Instruction Memory (0x2000_0000) - 13-bit address = 8KB
     // =====================================================
-    // axi_instr_mem u_axi_instr_mem (
-    //     .S_AXI_ACLK    (clk_i),
-    //     .S_AXI_ARESETN (rst_ni),
-    //     .S_AXI_AWVALID (instr_mem_axi_awvalid),
-    //     .S_AXI_AWREADY (instr_mem_axi_awready),
-    //     .S_AXI_AWADDR  (instr_mem_axi_awaddr[12:0]),
-    //     .S_AXI_AWPROT  (3'b000),
-    //     .S_AXI_WVALID  (instr_mem_axi_wvalid),
-    //     .S_AXI_WREADY  (instr_mem_axi_wready),
-    //     .S_AXI_WDATA   (instr_mem_axi_wdata),
-    //     .S_AXI_WSTRB   (instr_mem_axi_wstrb),
-    //     .S_AXI_BVALID  (instr_mem_axi_bvalid),
-    //     .S_AXI_BREADY  (instr_mem_axi_bready),
-    //     .S_AXI_BRESP   (instr_mem_axi_bresp),
-    //     .S_AXI_ARVALID (instr_mem_axi_arvalid),
-    //     .S_AXI_ARREADY (instr_mem_axi_arready),
-    //     .S_AXI_ARADDR  (instr_mem_axi_araddr[12:0]),
-    //     .S_AXI_ARPROT  (3'b000),
-    //     .S_AXI_RVALID  (instr_mem_axi_rvalid),
-    //     .S_AXI_RREADY  (instr_mem_axi_rready),
-    //     .S_AXI_RDATA   (instr_mem_axi_rdata),
-    //     .S_AXI_RRESP   (instr_mem_axi_rresp)
-    // );
+    instr_rom_8kB u_instr_mem (
+        .S_AXI_ACLK    (clk_i),
+        .S_AXI_ARESETN (rst_ni),
+
+        // AXI write-only interface
+        .S_AXI_AWVALID (instr_mem_axi_awvalid),
+        .S_AXI_AWREADY (instr_mem_axi_awready),
+        .S_AXI_AWADDR  (instr_mem_axi_awaddr[12:0]),
+        .S_AXI_AWPROT  (3'b000),
+
+        .S_AXI_WVALID  (instr_mem_axi_wvalid),
+        .S_AXI_WREADY  (instr_mem_axi_wready),
+        .S_AXI_WDATA   (instr_mem_axi_wdata),
+        .S_AXI_WSTRB   (instr_mem_axi_wstrb),
+
+        .S_AXI_BVALID  (instr_mem_axi_bvalid),
+        .S_AXI_BREADY  (instr_mem_axi_bready),
+        .S_AXI_BRESP   (instr_mem_axi_bresp),
+
+        // read side unused
+        .S_AXI_ARVALID (1'b0),
+        .S_AXI_ARADDR  ('0),
+        .S_AXI_ARPROT  (3'b000),
+        .S_AXI_RREADY  (1'b1),
+        .S_AXI_ARREADY (),
+        .S_AXI_RVALID  (),
+        .S_AXI_RDATA   (),
+        .S_AXI_RRESP   (),
+
+        // CPU instruction bus
+        .clk_i         (clk_i),
+        .rst_ni        (rst_ni),
+
+        .instr_req_i   (imem_req),
+        .instr_gnt_o   (imem_gnt),
+        .instr_rvalid_o(imem_rvalid),
+        .instr_addr_i  (imem_addr),
+        .instr_rdata_o (imem_rdata)
+    );
 
     // =====================================================
     // GPIO (0x8000_0000) - 4-bit address

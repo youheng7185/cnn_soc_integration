@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
     //     uart_send_byte(dut, tfp, conv2d_input_no[i]);
     // }  
 
-    tick(100000, dut, tfp); // let it process
+    tick(4000000, dut, tfp); // let it process
     
     // Access internal signal through rootp
     //std::cout << "mem_req = " << (int)dut->rootp->cv32e40p_verilator_top__DOT__mem_req << std::endl;

@@ -1,6 +1,7 @@
 # Ignore Verilator output folder
 obj_dir/
 .Xil/
+boot_rom_project/build/
 
 # Optional: ignore temporary simulation logs or dump files
 *.vcd
@@ -8,3 +9,4 @@ obj_dir/
 *.log
 *.o
 *.d
+*.fst.hier

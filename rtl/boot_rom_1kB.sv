@@ -18,15 +18,15 @@ module boot_rom_1kB (
     assign instr_rdata_o = rdata_q;
 
     // simple boot rom which jump to 0x80000000 directly
-    initial begin
-        instr_mem[0] = 32'h800002b7; // lui t0, 0x80000000
-        instr_mem[1] = 32'h000280e7; // JALR x0, 0(t0), jump to address in t0
-        for (int i = 2; i < 256; i++) begin
-            instr_mem[i] = 32'h00000013;  // NOP (addi x0, x0, 0)
-        end
-    end
+    // initial begin
+    //     instr_mem[0] = 32'h800002b7; // lui t0, 0x80000000
+    //     instr_mem[1] = 32'h000280e7; // JALR x0, 0(t0), jump to address in t0
+    //     for (int i = 2; i < 256; i++) begin
+    //         instr_mem[i] = 32'h00000013;  // NOP (addi x0, x0, 0)
+    //     end
+    // end
 
-    // initial $readmemh("boot_rom_project/build/bootrom_clean.hex", instr_mem);
+    initial $readmemh("boot_rom_project/build/bootrom_clean.hex", instr_mem);
     
     always_ff @(posedge clk_i or negedge rst_ni) begin
         if (!rst_ni) begin

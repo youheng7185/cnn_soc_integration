@@ -24,27 +24,29 @@ EOF
 #   axi_i2c/axi_i2cm.v
 #   axi_i2c/i2cm_controller.v
 #   axi_i2c/lli2cm.v
-FILES=(
-  axi_data_mem/axi_data_mem.v
-  axi_gpio/axi_gpio.v
 
-  axi_qspi/axi_qspi_controller.v
-  axi_qspi/clk_divider.v
-  axi_qspi/qspi_controller.v
-  axi_qspi/qspi_driver.v
+#   axi_qspi/axi_qspi_controller.v
+#   axi_qspi/clk_divider.v
+#   axi_qspi/qspi_controller.v
+#   axi_qspi/qspi_driver.v
+#   axi_uart/axi_uart.v
+#   axi_uart/uart.v
+#   axi_uart/uart_rx.v
+#   axi_uart/uart_tx.v
+  # axi_data_mem/axi_data_mem.v
+  # axi_gpio/axi_gpio.v
+  #rtl/instr_rom_8kB.v
+    #rtl/boot_rom_1kB.v
+FILES=(
   axi_timer/axi_timer.v
   axi_timer/timer.v
-  axi_uart/axi_uart.v
-  axi_uart/uart.v
-  axi_uart/uart_rx.v
-  axi_uart/uart_tx.v
+  axi_gpio/axi_gpio.v
   core2axi/rtl/core2axi.v
   rtl/axi_interconnect.v
-  rtl/boot_rom_1kB.v
+
   rtl/cv32e40p_clock_gate.v
   rtl/cv32e40p_librelane_top.v
   rtl/instr_bus_decoder.v
-  rtl/instr_rom_8kB.v
 )
 
 # -----------------------------
@@ -117,7 +119,12 @@ done
 cat >> "$OUT_JSON" <<EOF
   ],
   "CLOCK_PERIOD": 25,
-  "CLOCK_PORT": "clk"
+  "CLOCK_PORT": "clk",
+  "FP_CORE_UTIL": 35,
+  "PL_TARGET_DENSITY_PCT": 40,
+  "FP_PDN_VOFFSET": 5,
+  "FP_PDN_HOFFSET": 5,
+  "FP_PDN_AUTO_ADJUST": true
 }
 EOF
 

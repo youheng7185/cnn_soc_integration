@@ -28,10 +28,11 @@ int main(int argc, char **argv) {
 
     tick(100000, dut, tfp);
 
+    printf("sending uart data\n");
     // uncomment this to run inference
-    // for (uint32_t i = 0; i < 1960; i++) {
-    //     uart_send_byte(dut, tfp, conv2d_input_no[i]);
-    // }  
+    for (uint32_t i = 0; i < 1960; i++) {
+        uart_send_byte(dut, tfp, conv2d_input_no[i]);
+    }  
 
     tick(4000000, dut, tfp); // let it process
     

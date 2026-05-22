@@ -102,7 +102,7 @@ module instr_rom_8kB #(
     reg [31:0] mem [0:2047];
 
     // uncomment this to boot without copying from qpsi flash
-    // initial $readmemh("cnn_soc_c_project/build/firmware_clean.hex", mem);
+    initial $readmemh("cnn_soc_c_project/build/firmware_clean.hex", mem);
 
     // Port A: AXI write
     always @(posedge S_AXI_ACLK) begin

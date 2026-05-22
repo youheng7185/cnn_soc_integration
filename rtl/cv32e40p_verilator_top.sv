@@ -72,6 +72,8 @@ module cv32e40p_verilator_top (
     logic [31:0] imem_addr;
     logic [31:0] imem_rdata;
 
+    logic cnn_irq;
+
     cv32e40p_top #(
         .COREV_PULP(0),
         .COREV_CLUSTER(0),
@@ -85,7 +87,7 @@ module cv32e40p_verilator_top (
         .pulp_clock_en_i  (1'b1),
         .scan_cg_en_i     (1'b0),
 
-        .boot_addr_i      (32'h0000_0000),
+        .boot_addr_i      (32'h8000_0000),
         .mtvec_addr_i     (32'h8000_1E00),
         .dm_halt_addr_i   (32'h8000_1F00),
         .hart_id_i        (32'h0),
@@ -109,7 +111,7 @@ module cv32e40p_verilator_top (
         .data_rdata_i     (data_rdata),
 
         // interrupts/debug unused
-        .irq_i            (32'h0),
+        .irq_i            ({15'b0, cnn_irq, 16'b0}), // cnn irq bit 16
         .irq_ack_o        (),
         .irq_id_o         (),
         .debug_req_i      (1'b0),
@@ -864,7 +866,8 @@ module cv32e40p_verilator_top (
         .S_AXI_RVALID  (cnn_axi_rvalid),
         .S_AXI_RREADY  (cnn_axi_rready),
         .S_AXI_RDATA   (cnn_axi_rdata),
-        .S_AXI_RRESP   (cnn_axi_rresp)
+        .S_AXI_RRESP   (cnn_axi_rresp),
+        .irq_o         (cnn_irq)
     );
 
 endmodule

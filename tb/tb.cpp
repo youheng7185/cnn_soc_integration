@@ -1,8 +1,10 @@
 #include "Vcv32e40p_verilator_top.h"
 #include "verilated.h"
-#include "conv_input_data.h"
 #include <iostream>
+#include <fstream>
 #include <cstdint>
+#include <cstring>
+#include <cstdlib>
 
 static vluint64_t sim_time = 0;
 static Vcv32e40p_verilator_top *dut;
@@ -11,51 +13,71 @@ void tick(int32_t tick_val) {
     for (int i = 0; i < tick_val; i++) {
         dut->clk_i = 0;
         dut->eval();
-        sim_time += 5;   // half period = 5 time units
+        sim_time += 5;
         dut->clk_i = 1;
         dut->eval();
-        sim_time += 5;   // so #1 delay fits within the half period
+        sim_time += 5;
     }
-}
-
-void uart_send_byte(uint8_t data) {
-    const int BIT_CYCLES = 217;
-    auto drive = [&](int val) {
-        dut->uart0_rx_i = val;
-        tick(BIT_CYCLES);
-    };
-    drive(1);        // idle
-    drive(0);        // start bit
-    for (int i = 0; i < 8; i++)
-        drive((data >> i) & 1);
-    drive(1);        // stop bit
 }
 
 int main(int argc, char **argv) {
     Verilated::commandArgs(argc, argv);
+
+    uint32_t max_cycles = 500000;
+
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "+maxcycles") == 0 && i + 1 < argc) {
+            max_cycles = (uint32_t)atoi(argv[++i]);
+        }
+    }
+
     dut = new Vcv32e40p_verilator_top;
 
-    // Reset
     dut->rst_ni      = 0;
-    dut->uart0_rx_i  = 1;   // idle
+    dut->uart0_rx_i  = 1;
     dut->gpio_in     = 0xABAB;
     tick(5);
 
     dut->rst_ni = 1;
-    tick(100000);
 
-    // Uncomment to run inference:
-    // for (uint32_t i = 0; i < 1960; i++)
-    //     uart_send_byte(conv2d_input_no[i]);
+    uint16_t last_gpio_out = 0;
+    int result = 2;
 
-    tick(100000);  // let it process
+    for (uint32_t cycle = 0; cycle < max_cycles; cycle++) {
+        dut->clk_i = 0;
+        dut->eval();
+        sim_time += 5;
+        dut->clk_i = 1;
+        dut->eval();
+        sim_time += 5;
 
-    std::cout << "gpio_out = 0x" << std::hex << dut->gpio_out << std::endl;
+        uint16_t gpio_val = dut->gpio_out & 0xFFFF;
+        if (gpio_val != last_gpio_out && cycle > 100) {
+            if (gpio_val == 0x0001) {
+                std::cerr << "[TB] PASS (gpio_out=0x" << std::hex << gpio_val
+                          << std::dec << ") at cycle " << cycle << std::endl;
+                result = 0;
+                break;
+            } else if (gpio_val != 0) {
+                std::cerr << "[TB] FAIL (gpio_out=0x" << std::hex << gpio_val
+                          << std::dec << ") at cycle " << cycle << std::endl;
+                result = 1;
+                break;
+            }
+            last_gpio_out = gpio_val;
+        }
+    }
 
-    // Clean shutdown
+    if (result == 2) {
+        std::cerr << "[TB] TIMEOUT after " << max_cycles << " cycles" << std::endl;
+        std::cerr << "[TB] gpio_out=0x" << std::hex << (dut->gpio_out & 0xFFFF) << std::dec << std::endl;
+    }
+
+    tick(10);
+
     dut->rst_ni = 0;
     tick(5);
     dut->final();
     delete dut;
-    return 0;
+    return result;
 }

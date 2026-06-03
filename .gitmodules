@@ -28,3 +28,6 @@
 [submodule "2026_rv1480_axi_iic_master"]
 	path = axi_i2c
 	url = git@github.com:wcr490/2026_rv1480_axi_iic_master.git
+[submodule "librelane_openram_cnn_soc"]
+	path = librelane_openram_cnn_soc
+	url = git@github.com:youheng7185/librelane_openram_cnn_soc.git

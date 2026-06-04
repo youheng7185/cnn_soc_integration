@@ -401,9 +401,6 @@ module cv32e40p_verilator_top (
     // AXI Interconnect (1 master, 9 slaves)
     // =====================================================
     axi_interconnect u_axi_interconnect (
-        .clk_i   (clk_i),
-        .rst_ni  (rst_ni),
-
         // Master interface (from core2axi)
         .m_axi_awaddr  (axi_aw_addr),
         .m_axi_awvalid (axi_aw_valid),

@@ -9,7 +9,12 @@ module cv32e40p_librelane_top (
     input  logic        uart0_rx_i,
     output logic        uart0_tx_o,
     input  logic        uart1_rx_i,
-    output logic        uart1_tx_o
+    output logic        uart1_tx_o,
+    input  wire         i2c_scl_i,
+    input  wire         i2c_sda_i,
+    output wire         i2c_scl_o,
+    output wire         i2c_sda_o
+
 );
     // =====================
     // CPU data bus wires
@@ -331,26 +336,26 @@ module cv32e40p_librelane_top (
     logic        uart1_axi_rvalid;
     logic        uart1_axi_rready;
 
-    // // =====================================================
-    // // AXI Peripheral wires - I2C (0x8000_0400)
-    // // =====================================================
-    // logic [31:0] i2c_axi_awaddr;
-    // logic        i2c_axi_awvalid;
-    // logic        i2c_axi_awready;
-    // logic [31:0] i2c_axi_wdata;
-    // logic [3:0]  i2c_axi_wstrb;
-    // logic        i2c_axi_wvalid;
-    // logic        i2c_axi_wready;
-    // logic [1:0]  i2c_axi_bresp;
-    // logic        i2c_axi_bvalid;
-    // logic        i2c_axi_bready;
-    // logic [31:0] i2c_axi_araddr;
-    // logic        i2c_axi_arvalid;
-    // logic        i2c_axi_arready;
-    // logic [31:0] i2c_axi_rdata;
-    // logic [1:0]  i2c_axi_rresp;
-    // logic        i2c_axi_rvalid;
-    // logic        i2c_axi_rready;
+    // =====================================================
+    // AXI Peripheral wires - I2C (0x8000_0400)
+    // =====================================================
+    logic [31:0] i2c_axi_awaddr;
+    logic        i2c_axi_awvalid;
+    logic        i2c_axi_awready;
+    logic [31:0] i2c_axi_wdata;
+    logic [3:0]  i2c_axi_wstrb;
+    logic        i2c_axi_wvalid;
+    logic        i2c_axi_wready;
+    logic [1:0]  i2c_axi_bresp;
+    logic        i2c_axi_bvalid;
+    logic        i2c_axi_bready;
+    logic [31:0] i2c_axi_araddr;
+    logic        i2c_axi_arvalid;
+    logic        i2c_axi_arready;
+    logic [31:0] i2c_axi_rdata;
+    logic [1:0]  i2c_axi_rresp;
+    logic        i2c_axi_rvalid;
+    logic        i2c_axi_rready;
 
     // // =====================================================
     // // AXI Peripheral wires - QSPI (0x8000_0500)
@@ -531,41 +536,24 @@ module cv32e40p_librelane_top (
         .s5_axi_rvalid  (uart1_axi_rvalid),
         .s5_axi_rready  (uart1_axi_rready),
 
-        // // Slave 6: I2C (0x8000_0400)
-        // .s6_axi_awaddr  (i2c_axi_awaddr),
-        // .s6_axi_awvalid (i2c_axi_awvalid),
-        // .s6_axi_awready (i2c_axi_awready),
-        // .s6_axi_wdata   (i2c_axi_wdata),
-        // .s6_axi_wstrb   (i2c_axi_wstrb),
-        // .s6_axi_wvalid  (i2c_axi_wvalid),
-        // .s6_axi_wready  (i2c_axi_wready),
-        // .s6_axi_bresp   (i2c_axi_bresp),
-        // .s6_axi_bvalid  (i2c_axi_bvalid),
-        // .s6_axi_bready  (i2c_axi_bready),
-        // .s6_axi_araddr  (i2c_axi_araddr),
-        // .s6_axi_arvalid (i2c_axi_arvalid),
-        // .s6_axi_arready (i2c_axi_arready),
-        // .s6_axi_rdata   (i2c_axi_rdata),
-        // .s6_axi_rresp   (i2c_axi_rresp),
-        // .s6_axi_rvalid  (i2c_axi_rvalid),
-        // .s6_axi_rready  (i2c_axi_rready),
-        .s6_axi_awaddr  (),
-        .s6_axi_awvalid (),
-        .s6_axi_awready (),
-        .s6_axi_wdata   (),
-        .s6_axi_wstrb   (),
-        .s6_axi_wvalid  (),
-        .s6_axi_wready  (),
-        .s6_axi_bresp   (),
-        .s6_axi_bvalid  (),
-        .s6_axi_bready  (),
-        .s6_axi_araddr  (),
-        .s6_axi_arvalid (),
-        .s6_axi_arready (),
-        .s6_axi_rdata   (),
-        .s6_axi_rresp   (),
-        .s6_axi_rvalid  (),
-        .s6_axi_rready  (),
+        // Slave 6: I2C (0x8000_0400)
+        .s6_axi_awaddr  (i2c_axi_awaddr),
+        .s6_axi_awvalid (i2c_axi_awvalid),
+        .s6_axi_awready (i2c_axi_awready),
+        .s6_axi_wdata   (i2c_axi_wdata),
+        .s6_axi_wstrb   (i2c_axi_wstrb),
+        .s6_axi_wvalid  (i2c_axi_wvalid),
+        .s6_axi_wready  (i2c_axi_wready),
+        .s6_axi_bresp   (i2c_axi_bresp),
+        .s6_axi_bvalid  (i2c_axi_bvalid),
+        .s6_axi_bready  (i2c_axi_bready),
+        .s6_axi_araddr  (i2c_axi_araddr),
+        .s6_axi_arvalid (i2c_axi_arvalid),
+        .s6_axi_arready (i2c_axi_arready),
+        .s6_axi_rdata   (i2c_axi_rdata),
+        .s6_axi_rresp   (i2c_axi_rresp),
+        .s6_axi_rvalid  (i2c_axi_rvalid),
+        .s6_axi_rready  (i2c_axi_rready),
 
         // // Slave 7: QSPI (0x8000_0500)
         // .s7_axi_awaddr  (qspi_axi_awaddr),
@@ -824,39 +812,39 @@ module cv32e40p_librelane_top (
         .uart_tx_o     (uart1_tx_o)
     );
 
-    // // =====================================================
-    // // I2C (0x8000_0400) - 5-bit address
-    // // =====================================================
-    // axi_i2cm #(
-    //     .C_AXI_ADDR_WIDTH (5),
-    //     .OPT_LOWPOWER     (1'b0)
-    // ) u_axi_i2c (
-    //     .S_AXI_ACLK    (clk_i),
-    //     .S_AXI_ARESETN (rst_ni),
-    //     .S_AXI_AWVALID (i2c_axi_awvalid),
-    //     .S_AXI_AWREADY (i2c_axi_awready),
-    //     .S_AXI_AWADDR  (i2c_axi_awaddr[4:0]),
-    //     .S_AXI_AWPROT  (3'b000),
-    //     .S_AXI_WVALID  (i2c_axi_wvalid),
-    //     .S_AXI_WREADY  (i2c_axi_wready),
-    //     .S_AXI_WDATA   (i2c_axi_wdata),
-    //     .S_AXI_WSTRB   (i2c_axi_wstrb),
-    //     .S_AXI_BVALID  (i2c_axi_bvalid),
-    //     .S_AXI_BREADY  (i2c_axi_bready),
-    //     .S_AXI_BRESP   (i2c_axi_bresp),
-    //     .S_AXI_ARVALID (i2c_axi_arvalid),
-    //     .S_AXI_ARREADY (i2c_axi_arready),
-    //     .S_AXI_ARADDR  (i2c_axi_araddr[4:0]),
-    //     .S_AXI_ARPROT  (3'b000),
-    //     .S_AXI_RVALID  (i2c_axi_rvalid),
-    //     .S_AXI_RREADY  (i2c_axi_rready),
-    //     .S_AXI_RDATA   (i2c_axi_rdata),
-    //     .S_AXI_RRESP   (i2c_axi_rresp),
-    //     .i_scl         (i2c_scl_i),
-    //     .i_sda         (i2c_sda_i),
-    //     .o_scl         (i2c_scl_o),
-    //     .o_sda         (i2c_sda_o)
-    // );
+    // =====================================================
+    // I2C (0x8000_0400) - 5-bit address
+    // =====================================================
+    axi_i2cm #(
+        .C_AXI_ADDR_WIDTH (5),
+        .OPT_LOWPOWER     (1'b0)
+    ) u_axi_i2c (
+        .S_AXI_ACLK    (clk_i),
+        .S_AXI_ARESETN (rst_ni),
+        .S_AXI_AWVALID (i2c_axi_awvalid),
+        .S_AXI_AWREADY (i2c_axi_awready),
+        .S_AXI_AWADDR  (i2c_axi_awaddr[4:0]),
+        .S_AXI_AWPROT  (3'b000),
+        .S_AXI_WVALID  (i2c_axi_wvalid),
+        .S_AXI_WREADY  (i2c_axi_wready),
+        .S_AXI_WDATA   (i2c_axi_wdata),
+        .S_AXI_WSTRB   (i2c_axi_wstrb),
+        .S_AXI_BVALID  (i2c_axi_bvalid),
+        .S_AXI_BREADY  (i2c_axi_bready),
+        .S_AXI_BRESP   (i2c_axi_bresp),
+        .S_AXI_ARVALID (i2c_axi_arvalid),
+        .S_AXI_ARREADY (i2c_axi_arready),
+        .S_AXI_ARADDR  (i2c_axi_araddr[4:0]),
+        .S_AXI_ARPROT  (3'b000),
+        .S_AXI_RVALID  (i2c_axi_rvalid),
+        .S_AXI_RREADY  (i2c_axi_rready),
+        .S_AXI_RDATA   (i2c_axi_rdata),
+        .S_AXI_RRESP   (i2c_axi_rresp),
+        .i_scl         (i2c_scl_i),
+        .i_sda         (i2c_sda_i),
+        .o_scl         (i2c_scl_o),
+        .o_sda         (i2c_sda_o)
+    );
 
     // // =====================================================
     // // QSPI (0x8000_0500) - 5-bit address

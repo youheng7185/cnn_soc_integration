@@ -58,6 +58,9 @@ FILES=(
   axi_uart/uart.sv
   axi_uart/uart_rx.sv
   axi_uart/uart_tx.sv
+  axi_i2c/axi_i2cm.sv
+  axi_i2c/i2cm_controller.sv
+  axi_i2c/lli2cm.sv
 )
 
 FILES_SV2V=(

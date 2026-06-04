@@ -48,6 +48,12 @@
 ,
     "dir::axi_uart/uart_tx.sv"
 ,
+    "dir::axi_i2c/axi_i2cm.sv"
+,
+    "dir::axi_i2c/i2cm_controller.sv"
+,
+    "dir::axi_i2c/lli2cm.sv"
+,
     "dir::sv2v_out/cv32e40p/cv32e40p_aligner.v"
 ,
     "dir::sv2v_out/cv32e40p/cv32e40p_alu.v"

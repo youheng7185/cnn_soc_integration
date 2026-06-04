@@ -5,8 +5,17 @@ OUT_JSON="design_config.json"
 
 cat > "$OUT_JSON" <<EOF
 {
+  "EXTRA_LIBS":    "../../../.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130B/libs.ref/sky130_sram_macros/lib/sky130_sram_1kbyte_1rw1r_32x256_8_TT_1p8V_25C.lib",
+  "EXTRA_LEFS":      "../../../.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130B/libs.ref/sky130_sram_macros/lef/sky130_sram_1kbyte_1rw1r_32x256_8.lef",
+  "EXTRA_GDS_FILES": "../../../.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130B/libs.ref/sky130_sram_macros/gds/sky130_sram_1kbyte_1rw1r_32x256_8.gds",
+
   "DESIGN_NAME": "cv32e40p_librelane_top",
+  "DESIGN_IS_CORE": true,
+  "VDD_NETS": "vccd1",
+  "GND_NETS": "vssd1",
+  "FP_PDN_MACRO_HOOKS": "u_instr_mem.u_sram.bank0 vccd1 vssd1 vccd1 vssd1, u_instr_mem.u_sram.bank1 vccd1 vssd1 vccd1 vssd1, u_instr_mem.u_sram.bank2 vccd1 vssd1 vccd1 vssd1, u_instr_mem.u_sram.bank3 vccd1 vssd1 vccd1 vssd1, u_instr_mem.u_sram.bank4 vccd1 vssd1 vccd1 vssd1, u_instr_mem.u_sram.bank5 vccd1 vssd1 vccd1 vssd1, u_instr_mem.u_sram.bank6 vccd1 vssd1 vccd1 vssd1, u_instr_mem.u_sram.bank7 vccd1 vssd1 vccd1 vssd1, u_axi_data_mem.u_sram.bank0 vccd1 vssd1 vccd1 vssd1, u_axi_data_mem.u_sram.bank1 vccd1 vssd1 vccd1 vssd1, u_axi_data_mem.u_sram.bank2 vccd1 vssd1 vccd1 vssd1, u_axi_data_mem.u_sram.bank3 vccd1 vssd1 vccd1 vssd1, u_axi_data_mem.u_sram.bank4 vccd1 vssd1 vccd1 vssd1, u_axi_data_mem.u_sram.bank5 vccd1 vssd1 vccd1 vssd1, u_axi_data_mem.u_sram.bank6 vccd1 vssd1 vccd1 vssd1, u_axi_data_mem.u_sram.bank7 vccd1 vssd1 vccd1 vssd1",
   "VERILOG_FILES": [
+    "dir::../../../.ciel/ciel/sky130/versions/8afc8346a57fe1ab7934ba5a6056ea8b43078e71/sky130B/libs.ref/sky130_sram_macros/verilog/sky130_sram_1kbyte_1rw1r_32x256_8.v",
 EOF
 
 # FILES=(
@@ -29,24 +38,29 @@ EOF
 #   axi_qspi/clk_divider.v
 #   axi_qspi/qspi_controller.v
 #   axi_qspi/qspi_driver.v
-#   axi_uart/axi_uart.v
-#   axi_uart/uart.v
-#   axi_uart/uart_rx.v
-#   axi_uart/uart_tx.v
-  # axi_data_mem/axi_data_mem.v
-  # axi_gpio/axi_gpio.v
-  #rtl/instr_rom_8kB.v
-    #rtl/boot_rom_1kB.v
-FILES=(
-  axi_timer/axi_timer.v
-  axi_timer/timer.v
-  axi_gpio/axi_gpio.v
-  core2axi/rtl/core2axi.v
-  rtl/axi_interconnect.v
 
-  rtl/cv32e40p_clock_gate.v
-  rtl/cv32e40p_librelane_top.v
-  rtl/instr_bus_decoder.v
+FILES=(
+  axi_timer/axi_timer.sv
+  axi_timer/timer.sv
+  axi_gpio/axi_gpio.sv
+  core2axi/rtl/core2axi.sv
+  rtl/axi_interconnect.sv
+  rtl/cv32e40p_clock_gate.sv
+  rtl/cv32e40p_librelane_top.sv
+  rtl/instr_bus_decoder.sv
+
+  librelane_openram_cnn_soc/instr_rom_8kB.v
+  librelane_openram_cnn_soc/axi_data_mem.v
+  librelane_openram_cnn_soc/sram_8kbyte_1rw1r_32x2048_8.v
+  rtl/boot_rom_1kB.sv
+
+  axi_uart/axi_uart.sv
+  axi_uart/uart.sv
+  axi_uart/uart_rx.sv
+  axi_uart/uart_tx.sv
+)
+
+FILES_SV2V=(
 )
 
 # -----------------------------
@@ -108,6 +122,10 @@ done
 
 # Project RTL
 for f in "${FILES[@]}"; do
+  write_file "$f"
+done
+
+for f in "${FILES_SV2V[@]}"; do
   write_file "sv2v_out/$f"
 done
 
@@ -119,12 +137,21 @@ done
 cat >> "$OUT_JSON" <<EOF
   ],
   "CLOCK_PERIOD": 25,
-  "CLOCK_PORT": "clk",
+  "CLOCK_PORT": "clk_i",
   "FP_CORE_UTIL": 35,
   "PL_TARGET_DENSITY_PCT": 40,
   "FP_PDN_VOFFSET": 5,
   "FP_PDN_HOFFSET": 5,
-  "FP_PDN_AUTO_ADJUST": true
+  "FP_PDN_AUTO_ADJUST": true,
+
+  "FP_SIZING": "absolute",
+  "DIE_AREA": "0 0 5800 3200",
+  "PL_TARGET_DENSITY": 0.5,
+
+  "MACRO_PLACEMENT_CFG": "dir::macro_placement.cfg",
+  "RUN_KLAYOUT_XOR": false,
+  "MAGIC_DRC_USE_GDS": false,
+  "QUIT_ON_MAGIC_DRC": false
 }
 EOF
 

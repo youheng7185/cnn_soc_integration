@@ -2,6 +2,8 @@
 obj_dir/
 .Xil/
 boot_rom_project/build/
+runs/
+sv2v_out/
 
 # Optional: ignore temporary simulation logs or dump files
 *.vcd

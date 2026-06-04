@@ -1,7 +1,4 @@
 module axi_interconnect (
-    input wire clk_i,
-    input wire rst_ni,
-
     // =====================================================
     // Master interface (from core2axi)
     // =====================================================
@@ -182,6 +179,7 @@ module axi_interconnect (
     input  wire        s5_axi_rvalid,
     output wire        s5_axi_rready,
 
+    /* verilator lint_off PINMISSING */
     // =====================================================
     // Slave 6: I2C (0x8000_0400)
     // =====================================================
@@ -207,6 +205,7 @@ module axi_interconnect (
     input  wire        s6_axi_rvalid,
     output wire        s6_axi_rready,
 
+    /* verilator lint_off PINMISSING */
     // =====================================================
     // Slave 7: QSPI (0x8000_0500)
     // =====================================================
@@ -232,6 +231,7 @@ module axi_interconnect (
     input  wire        s7_axi_rvalid,
     output wire        s7_axi_rready,
 
+    /* verilator lint_off PINMISSING */
     // =====================================================
     // Slave 8: CNN Accelerator (0x8000_1000)
     // =====================================================
@@ -295,21 +295,39 @@ module axi_interconnect (
     // CNN_MASK (larger region inside 0x8000_xxxx), then
     // PERIPH_MASK for the 256-byte-granularity peripherals.
     // =====================================================
+    // function automatic [8:0] decode_addr(input logic [31:0] addr);
+    //     logic [8:0] sel;
+    //     sel = 9'b0;
+    //     if      ((addr & MEM_MASK)    == DATA_MEM_BASE)  sel[0] = 1'b1;
+    //     else if ((addr & MEM_MASK)    == INSTR_MEM_BASE) sel[1] = 1'b1;
+    //     else if ((addr & CNN_MASK)    == CNN_BASE)        sel[8] = 1'b1;
+    //     else if ((addr & PERIPH_MASK) == GPIO_BASE)       sel[2] = 1'b1;
+    //     else if ((addr & PERIPH_MASK) == TIMER_BASE)      sel[3] = 1'b1;
+    //     else if ((addr & PERIPH_MASK) == UART0_BASE)      sel[4] = 1'b1;
+    //     else if ((addr & PERIPH_MASK) == UART1_BASE)      sel[5] = 1'b1;
+    //     else if ((addr & PERIPH_MASK) == I2C_BASE)        sel[6] = 1'b1;
+    //     else if ((addr & PERIPH_MASK) == QSPI_BASE)       sel[7] = 1'b1;
+    //     return sel;
+    // endfunction
     function automatic [8:0] decode_addr(input logic [31:0] addr);
         logic [8:0] sel;
-        sel = 9'b0;
-        if      ((addr & MEM_MASK)    == DATA_MEM_BASE)  sel[0] = 1'b1;
-        else if ((addr & MEM_MASK)    == INSTR_MEM_BASE) sel[1] = 1'b1;
-        else if ((addr & CNN_MASK)    == CNN_BASE)        sel[8] = 1'b1;
-        else if ((addr & PERIPH_MASK) == GPIO_BASE)       sel[2] = 1'b1;
-        else if ((addr & PERIPH_MASK) == TIMER_BASE)      sel[3] = 1'b1;
-        else if ((addr & PERIPH_MASK) == UART0_BASE)      sel[4] = 1'b1;
-        else if ((addr & PERIPH_MASK) == UART1_BASE)      sel[5] = 1'b1;
-        else if ((addr & PERIPH_MASK) == I2C_BASE)        sel[6] = 1'b1;
-        else if ((addr & PERIPH_MASK) == QSPI_BASE)       sel[7] = 1'b1;
-        return sel;
-    endfunction
+        begin
+            sel = 9'b0;
 
+            if      ((addr & MEM_MASK)    == DATA_MEM_BASE)  sel[0] = 1'b1;
+            else if ((addr & MEM_MASK)    == INSTR_MEM_BASE) sel[1] = 1'b1;
+            else if ((addr & CNN_MASK)    == CNN_BASE)       sel[8] = 1'b1;
+            else if ((addr & PERIPH_MASK) == GPIO_BASE)      sel[2] = 1'b1;
+            else if ((addr & PERIPH_MASK) == TIMER_BASE)     sel[3] = 1'b1;
+            else if ((addr & PERIPH_MASK) == UART0_BASE)     sel[4] = 1'b1;
+            else if ((addr & PERIPH_MASK) == UART1_BASE)     sel[5] = 1'b1;
+            else if ((addr & PERIPH_MASK) == I2C_BASE)       sel[6] = 1'b1;
+            else if ((addr & PERIPH_MASK) == QSPI_BASE)      sel[7] = 1'b1;
+
+            decode_addr = sel;
+        end
+    endfunction
+    
     // =====================================================
     // Address decoding — Write Address Channel
     // =====================================================

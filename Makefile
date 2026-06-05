@@ -1,7 +1,7 @@
 # ============================================================
 # Verilator Makefile – CV32E40P SoC
 # ============================================================
-TOP            := cv32e40p_verilator_top
+TOP            := teknotest_wrapper
 BUILD_DIR      := obj_dir
 SIM            := $(BUILD_DIR)/V$(TOP)
 VERILATOR      := verilator
@@ -73,7 +73,8 @@ RTL_SRC := \
     rtl/instr_bus_decoder.sv \
     rtl/instr_rom_8kB.sv \
     rtl/boot_rom_1kB.sv \
-    rtl/cv32e40p_verilator_top.sv
+    rtl/cv32e40p_verilator_top.sv \
+    rtl/teknotest_wrapper.sv
 
 # Include paths (SystemVerilog packages)
 INCLUDES := \

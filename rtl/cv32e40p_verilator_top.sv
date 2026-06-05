@@ -87,7 +87,7 @@ module cv32e40p_verilator_top (
         .pulp_clock_en_i  (1'b1),
         .scan_cg_en_i     (1'b0),
 
-        .boot_addr_i      (32'h8000_0000),
+        .boot_addr_i      (32'h0000_0000),
         .mtvec_addr_i     (32'h8000_1E00),
         .dm_halt_addr_i   (32'h8000_1F00),
         .hart_id_i        (32'h0),

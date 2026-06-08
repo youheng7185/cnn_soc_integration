@@ -21,7 +21,7 @@ VERILATOR_FLAGS := \
 # ------------------------------------------------------------
 # Testbench
 # ------------------------------------------------------------
-TB_CPP := tb/tb.cpp
+TB_CPP := tb/tb2.cpp
 
 # ------------------------------------------------------------
 # RTL sources
@@ -74,7 +74,8 @@ RTL_SRC := \
     rtl/instr_rom_8kB.sv \
     rtl/boot_rom_1kB.sv \
     rtl/cv32e40p_verilator_top.sv \
-    rtl/teknotest_wrapper.sv
+    rtl/teknotest_wrapper.sv \
+    rtl/cv32e40p_sim.sv
 
 # Include paths (SystemVerilog packages)
 INCLUDES := \

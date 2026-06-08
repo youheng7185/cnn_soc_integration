@@ -27,7 +27,8 @@ module boot_rom_1kB (
     // end
 
     // initial $readmemh("boot_rom_project/build/bootrom_clean.hex", instr_mem);
-    initial $readmemh("rtl/helloworld.mem", instr_mem);
+    // initial $readmemh("rtl/helloworld.mem", instr_mem);
+    initial $readmemh("helloworld.mem", instr_mem);
 
     always_ff @(posedge clk_i or negedge rst_ni) begin
         if (!rst_ni) begin

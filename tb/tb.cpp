@@ -26,7 +26,10 @@ int main(int argc, char **argv) {
     dut->uart_rx_i = 1; // not active
     // dut->gpio_in = 0xABAB;
 
+    tick(5000, dut, tfp);
+    uart_send_byte(dut, tfp, 'A');
     tick(100000, dut, tfp);
+
 
     printf("sending uart data\n");
     // uncomment this to run inference
@@ -64,7 +67,7 @@ void tick(int32_t tick_val, Vteknotest_wrapper *dut, VerilatedFstC* tfp) {
 }
 
 void uart_send_byte(Vteknotest_wrapper *dut, VerilatedFstC* tfp, uint8_t data) {
-    const int BIT_CYCLES = 217;
+    const int BIT_CYCLES = 434;
 
     auto drive = [&](int val) {
         dut->uart_rx_i = val;

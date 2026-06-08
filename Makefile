@@ -75,11 +75,21 @@ RTL_SRC := \
     rtl/boot_rom_1kB.sv \
     rtl/cv32e40p_verilator_top.sv \
     rtl/teknotest_wrapper.sv \
-    rtl/cv32e40p_sim.sv
+    rtl/cv32e40p_sim.sv \
+    pulp_axi/src/axi_pkg.sv \
+    pulp_axi/src/axi_lite_demux.sv \
+    pulp_common_cells/src/spill_register.sv \
+    pulp_common_cells/src/spill_register_flushable.sv \
+    pulp_common_cells/src/fifo_v3.sv \
+    pulp_common_cells/src/addr_decode.sv \
+    pulp_common_cells/src/cf_math_pkg.sv \
+    pulp_common_cells/src/addr_decode_dync.sv
 
 # Include paths (SystemVerilog packages)
 INCLUDES := \
-    -Icv32e40p/rtl/include
+    -Icv32e40p/rtl/include \
+    -Ipulp_common_cells/include \
+    -Ipulp_axi/include
 
 # ------------------------------------------------------------
 # Build rules

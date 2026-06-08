@@ -31,3 +31,9 @@
 [submodule "librelane_openram_cnn_soc"]
 	path = librelane_openram_cnn_soc
 	url = git@github.com:youheng7185/librelane_openram_cnn_soc.git
+[submodule "pulp_axi"]
+	path = pulp_axi
+	url = https://github.com/pulp-platform/axi.git
+[submodule "pulp_common_cells"]
+	path = pulp_common_cells
+	url = https://github.com/pulp-platform/common_cells.git

@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
         uart_send_byte(dut, tfp, conv2d_input_no[i]);
     }  
 
-    tick(4000000, dut, tfp); // let it process
+    tick(400000, dut, tfp); // let it process
     
     // Access internal signal through rootp
     //std::cout << "mem_req = " << (int)dut->rootp->cv32e40p_verilator_top__DOT__mem_req << std::endl;
@@ -64,7 +64,7 @@ void tick(int32_t tick_val, Vcv32e40p_verilator_top *dut, VerilatedFstC* tfp) {
 }
 
 void uart_send_byte(Vcv32e40p_verilator_top *dut, VerilatedFstC* tfp, uint8_t data) {
-    const int BIT_CYCLES = 217;
+    const int BIT_CYCLES = 20;
 
     auto drive = [&](int val) {
         dut->uart0_rx_i = val;

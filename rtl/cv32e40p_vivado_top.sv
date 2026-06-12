@@ -78,6 +78,8 @@ module cv32e40p_vivado_top (
     logic [31:0] imem_addr;
     logic [31:0] imem_rdata;
 
+    logic cnn_irq;
+
     cv32e40p_top #(
         .COREV_PULP(0),
         .COREV_CLUSTER(0),
@@ -91,7 +93,7 @@ module cv32e40p_vivado_top (
         .pulp_clock_en_i  (1'b1),
         .scan_cg_en_i     (1'b0),
 
-        .boot_addr_i      (32'h0000_0000),
+        .boot_addr_i      (32'h8000_0000),
         .mtvec_addr_i     (32'h8000_1E00),
         .dm_halt_addr_i   (32'h8000_1F00),
         .hart_id_i        (32'h0),
@@ -115,7 +117,7 @@ module cv32e40p_vivado_top (
         .data_rdata_i     (data_rdata),
 
         // interrupts/debug unused
-        .irq_i            (32'h0),
+        .irq_i            ({15'b0, cnn_irq, 16'b0}),
         .irq_ack_o        (),
         .irq_id_o         (),
         .debug_req_i      (1'b0),
@@ -201,16 +203,16 @@ module cv32e40p_vivado_top (
         .instr_rdata_o  (boot_rdata)
     );
 
-    instr_rom_8kB u_imem (
-        .clk_i         (clk_i),
-        .rst_ni        (rst_ni),
+    // instr_rom_8kB u_imem (
+    //     .clk_i         (clk_i),
+    //     .rst_ni        (rst_ni),
 
-        .instr_req_i    (imem_req),
-        .instr_gnt_o    (imem_gnt),
-        .instr_rvalid_o (imem_rvalid),
-        .instr_addr_i   (imem_addr),
-        .instr_rdata_o  (imem_rdata)
-    );
+    //     .instr_req_i    (imem_req),
+    //     .instr_gnt_o    (imem_gnt),
+    //     .instr_rvalid_o (imem_rvalid),
+    //     .instr_addr_i   (imem_addr),
+    //     .instr_rdata_o  (imem_rdata)
+    // );
 
     // =====================================================
     // AXI Peripheral wires - Data Memory (0x1000_0000)
@@ -405,9 +407,6 @@ module cv32e40p_vivado_top (
     // AXI Interconnect (1 master, 9 slaves)
     // =====================================================
     axi_interconnect u_axi_interconnect (
-        .clk_i   (clk_i),
-        .rst_ni  (rst_ni),
-
         // Master interface (from core2axi)
         .m_axi_awaddr  (axi_aw_addr),
         .m_axi_awvalid (axi_aw_valid),
@@ -629,29 +628,47 @@ module cv32e40p_vivado_top (
     // =====================================================
     // Instruction Memory (0x2000_0000) - 13-bit address = 8KB
     // =====================================================
-    // axi_instr_mem u_axi_instr_mem (
-    //     .S_AXI_ACLK    (clk_i),
-    //     .S_AXI_ARESETN (rst_ni),
-    //     .S_AXI_AWVALID (instr_mem_axi_awvalid),
-    //     .S_AXI_AWREADY (instr_mem_axi_awready),
-    //     .S_AXI_AWADDR  (instr_mem_axi_awaddr[12:0]),
-    //     .S_AXI_AWPROT  (3'b000),
-    //     .S_AXI_WVALID  (instr_mem_axi_wvalid),
-    //     .S_AXI_WREADY  (instr_mem_axi_wready),
-    //     .S_AXI_WDATA   (instr_mem_axi_wdata),
-    //     .S_AXI_WSTRB   (instr_mem_axi_wstrb),
-    //     .S_AXI_BVALID  (instr_mem_axi_bvalid),
-    //     .S_AXI_BREADY  (instr_mem_axi_bready),
-    //     .S_AXI_BRESP   (instr_mem_axi_bresp),
-    //     .S_AXI_ARVALID (instr_mem_axi_arvalid),
-    //     .S_AXI_ARREADY (instr_mem_axi_arready),
-    //     .S_AXI_ARADDR  (instr_mem_axi_araddr[12:0]),
-    //     .S_AXI_ARPROT  (3'b000),
-    //     .S_AXI_RVALID  (instr_mem_axi_rvalid),
-    //     .S_AXI_RREADY  (instr_mem_axi_rready),
-    //     .S_AXI_RDATA   (instr_mem_axi_rdata),
-    //     .S_AXI_RRESP   (instr_mem_axi_rresp)
-    // );
+
+    instr_rom_8kB u_instr_mem (
+        .S_AXI_ACLK    (clk_i),
+        .S_AXI_ARESETN (rst_ni),
+
+        // AXI write-only interface
+        .S_AXI_AWVALID (instr_mem_axi_awvalid),
+        .S_AXI_AWREADY (instr_mem_axi_awready),
+        .S_AXI_AWADDR  (instr_mem_axi_awaddr[12:0]),
+        .S_AXI_AWPROT  (3'b000),
+
+        .S_AXI_WVALID  (instr_mem_axi_wvalid),
+        .S_AXI_WREADY  (instr_mem_axi_wready),
+        .S_AXI_WDATA   (instr_mem_axi_wdata),
+        .S_AXI_WSTRB   (instr_mem_axi_wstrb),
+
+        .S_AXI_BVALID  (instr_mem_axi_bvalid),
+        .S_AXI_BREADY  (instr_mem_axi_bready),
+        .S_AXI_BRESP   (instr_mem_axi_bresp),
+
+        // read side unused
+        .S_AXI_ARVALID (1'b0),
+        .S_AXI_ARADDR  ('0),
+        .S_AXI_ARPROT  (3'b000),
+        .S_AXI_RREADY  (1'b1),
+        .S_AXI_ARREADY (),
+        .S_AXI_RVALID  (),
+        .S_AXI_RDATA   (),
+        .S_AXI_RRESP   (),
+
+        // CPU instruction bus
+        .clk_i         (clk_i),
+        .rst_ni        (rst_ni),
+
+        .instr_req_i   (imem_req),
+        .instr_gnt_o   (imem_gnt),
+        .instr_rvalid_o(imem_rvalid),
+        .instr_addr_i  (imem_addr),
+        .instr_rdata_o (imem_rdata)
+    );
+
 
     // =====================================================
     // GPIO (0x8000_0000) - 4-bit address
@@ -860,7 +877,8 @@ module cv32e40p_vivado_top (
         .S_AXI_RVALID  (cnn_axi_rvalid),
         .S_AXI_RREADY  (cnn_axi_rready),
         .S_AXI_RDATA   (cnn_axi_rdata),
-        .S_AXI_RRESP   (cnn_axi_rresp)
+        .S_AXI_RRESP   (cnn_axi_rresp),
+        .irq_o         (cnn_irq)
     );
 
 endmodule
